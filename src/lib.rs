@@ -1,4 +1,5 @@
 mod state;
+mod ws;
 
 pub mod ggez_prelude {
     pub use ggez::{
@@ -24,6 +25,7 @@ pub mod consts {
     pub const WINDOW_X: f32 = 1280.0;
     pub const WINDOW_Y: f32 = 720.0;
     pub const BACKGROUND_COLOR: Color = graphics::BLACK;
+    pub const ORIGIN: &str = "http://slither.io";
 }
 
 pub use state::State;
