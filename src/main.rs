@@ -9,7 +9,7 @@ fn main() -> GameResult<()> {
         .window_mode(WindowMode::default().dimensions(WINDOW_X, WINDOW_Y))
         .build()?;
     
-    let state = &mut State;
+    let state = &mut State::new();
 
     event::run(ctx, events_loop, state)
 }
