@@ -1,5 +1,8 @@
 mod state;
 mod ws;
+mod utils;
+
+type Msg = Vec<u8>;
 
 pub mod ggez_prelude {
     pub use ggez::{
