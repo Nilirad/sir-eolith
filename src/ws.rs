@@ -7,6 +7,7 @@ use websocket::{
     header::Headers,
     header::Origin,
     receiver::Reader,
+    result::{WebSocketResult, WebSocketError},
     sender::Writer,
     Message,
     OwnedMessage,
@@ -15,12 +16,10 @@ use websocket::{
 type Msg = Vec<u8>;
 
 pub struct WebSocket {
+    /// Reads data coming from server.
+    receiver: Reader<TcpStream>,
     /// Sends data to server.
     sender: Writer<TcpStream>,
-    /// Channel receiver that gets messages from the WebSocket listener thread.
-    channel: Receiver<Msg>,
-    /// Join handle for WebSocket listener thread.
-    handle: JoinHandle<()>,
 }
 
 impl WebSocket {
@@ -33,39 +32,23 @@ impl WebSocket {
             .custom_headers(&headers)
             .connect_insecure()
             .unwrap(); // TODO: ugly.
-
-        let (tx, rx) = unbounded::<Msg>();
         
         let (mut receiver, sender) = client.split().unwrap(); // TODO: ugly.
 
-        // A thread is spawned because the incoming_messages() method is thread-blocking.
-        let handle = thread::spawn(move || {
-            for message in receiver.incoming_messages() {
-                if let Ok(message) = message {
-                    match message {
-                        OwnedMessage::Binary(data) => {
-                            if let Err(error) = tx.send(data) {
-                                println!("Error: {}", error);
-                            }
-                        }
-                        OwnedMessage::Close(_) => {
-                            break;
-                        }
-                        _ => (),
-                    }
-                }
-            }
-        });
-
         Self {
+            receiver,
             sender,
-            channel: rx,
-            handle,
         }
     }
 
     pub fn poll_messages(&mut self) -> Vec<Msg> {
-        self.channel.try_iter().collect()
+        let mut messages = Vec::new();
+        while let Ok(message) = self.receiver.recv_message() {
+            if let OwnedMessage::Binary(message_bytes) = message {
+                messages.push(message_bytes);
+            }
+        }
+        messages
     }
 
     pub fn send_message(&mut self, message: Msg) {
