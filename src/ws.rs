@@ -26,13 +26,12 @@ pub struct WebSocket {
     /// Sends data to server.
     sender: Writer<TcpStream>,
     channel: Receiver<ServerMsg>,
-    pub handle: JoinHandle<()>,
     /// Connection state.
     pub state: ConnectionState,
 }
 
 impl WebSocket {
-    pub fn new(url: String) -> Self {
+    pub fn new(url: String) -> (Self, JoinHandle<()>) {
         let mut headers = Headers::new();
         headers.set(Origin(ORIGIN.to_owned()));
 
@@ -47,7 +46,7 @@ impl WebSocket {
 
         let (tx, rx) = unbounded();
 
-        let handle = thread::spawn(move || {
+        let thread_handle = thread::spawn(move || {
             for message in receiver.incoming_messages() {
                 let message = match message {
                     Ok(m) => m,
@@ -67,12 +66,14 @@ impl WebSocket {
 
         Self::request_login(&mut sender);
 
-        Self {
-            sender,
-            channel: rx,
-            handle,
-            state: ConnectionState::LoggingIn,
-        }
+        (
+            Self {
+                sender,
+                channel: rx,
+                state: ConnectionState::LoggingIn,
+            },
+            thread_handle,
+        )
     }
 
     pub fn poll_messages(&mut self) -> Vec<ServerMsg> {
@@ -82,6 +83,12 @@ impl WebSocket {
     pub fn send_message(&mut self, message: ClientMsg) {
         if let Err(error) = self.sender.send_message(&OwnedMessage::Binary(message)) {
             println!("Error: {}", error);
+        }
+    }
+
+    pub fn close(&mut self) {
+        if let Err(error) = self.sender.send_message(&OwnedMessage::Close(None)) {
+            println!("Cannot close connection: {}", error);
         }
     }
 

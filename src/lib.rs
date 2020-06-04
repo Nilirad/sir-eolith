@@ -1,7 +1,7 @@
 mod state;
-mod ws;
 mod utils;
 mod message;
+pub mod ws;
 
 pub mod ggez_prelude {
     pub use ggez::{

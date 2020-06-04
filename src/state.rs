@@ -1,7 +1,6 @@
 use crate::ggez_prelude::*;
 use crate::ws::{ConnectionState, WebSocket};
-use crate::consts::*;
-use crate::message::{ClientMsg, Op, ServerMsg};
+use crate::message::{Op, ServerMsg};
 use crate::utils::decrypt_message;
 
 pub struct State {
@@ -11,9 +10,9 @@ pub struct State {
 const PROVISIONAL_LGBA_MSG: [u8; 4] = [115, 10, 0, 0];
 
 impl State {
-    pub fn new() -> Self {
+    pub fn new(connection: WebSocket) -> Self {
         Self {
-            connection: WebSocket::new(SERVER_URL.to_owned()),
+            connection,
         }
     }
 
@@ -50,5 +49,10 @@ impl EventHandler for State {
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         graphics::clear(ctx, graphics::BLACK);
         graphics::present(ctx)
+    }
+
+    fn quit_event(&mut self, _ctx: &mut Context) -> bool {
+        self.connection.close();
+        false
     }
 }
