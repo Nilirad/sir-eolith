@@ -2949,9 +2949,8 @@ dependencies = [
 
 [[package]]
 name = "websocket"
-version = "0.24.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "413b37840b9e27b340ce91b319ede10731de8c72f5bc4cb0206ec1ca4ce581d0"
+version = "0.26.0"
+source = "git+https://github.com/Nilirad/rust-websocket?branch=feat/ignore-sec-websocket-accept#3ad0db39036e0115e746f83d912f1b6dbc48dd78"
 dependencies = [
  "bytes",
  "futures",
@@ -2970,9 +2969,8 @@ dependencies = [
 
 [[package]]
 name = "websocket-base"
-version = "0.24.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e3810f0d00c4dccb54c30a4eee815e703232819dec7b007db115791c42aa374"
+version = "0.26.0"
+source = "git+https://github.com/Nilirad/rust-websocket?branch=feat/ignore-sec-websocket-accept#3ad0db39036e0115e746f83d912f1b6dbc48dd78"
 dependencies = [
  "base64 0.10.1",
  "bitflags",

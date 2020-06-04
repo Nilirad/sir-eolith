@@ -9,5 +9,5 @@ edition = "2018"
 [dependencies]
 ggez = "0.5.1"
 legion = { git = "https://github.com/TomGillen/legion" }
-websocket = "0.24.0"
+websocket = { git = "https://github.com/Nilirad/rust-websocket", branch = "feat/ignore-sec-websocket-accept" }
 crossbeam-channel = "0.4.2"

@@ -49,8 +49,6 @@ impl WebSocket {
             .custom_headers(&headers)
             .connect_insecure()
             .unwrap(); // TODO: ugly.
-
-        println!("Done. Splitting connection...");
         
         let (mut receiver, sender) = client.split().unwrap(); // TODO: ugly.
 
