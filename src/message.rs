@@ -1,13 +1,6 @@
 use num_enum::TryFromPrimitive;
 use std::convert::TryFrom;
 
-pub type ClientMsg = Vec<u8>;
-
-pub enum Msg {
-    Server(ServerMsg),
-    Client(ClientMsg),
-}
-
 /// Server message opcode. Tells the client what type of operation it should perform.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, TryFromPrimitive)]
 #[repr(u8)]
@@ -21,6 +14,8 @@ pub enum Op {
     GameOver = 'v' as u8,
     /// A new snake must be loaded or an existing snake must be removed.
     SnakeAction = 's' as u8,
+    /// Response to client ping
+    PingResponse = 'p' as u8,
     /// A snake must be moved to a new location.
     PosAbs = 'g' as u8,
     /// A snake must be moved to a new location and a new section must be added.
@@ -32,6 +27,8 @@ pub enum Op {
     /// A snake must lose a section.
     Shrink = 'r' as u8,
 }
+
+pub type ClientMsg = Vec<u8>;
 
 /// A server message sent to the client. Contains additional data to help parsing data.
 pub struct ServerMsg {

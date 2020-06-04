@@ -80,7 +80,7 @@ impl WebSocket {
         self.channel.try_iter().collect()
     }
 
-    pub fn send_message(&mut self, message: ClientMsg) {
+    pub fn send(&mut self, message: ClientMsg) {
         if let Err(error) = self.sender.send_message(&OwnedMessage::Binary(message)) {
             println!("Error: {}", error);
         }
