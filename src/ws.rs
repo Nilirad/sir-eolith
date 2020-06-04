@@ -1,6 +1,5 @@
 use crate::consts::*;
-use crate::Msg;
-use std::collections::VecDeque;
+use crate::message::{ClientMsg, ServerMsg};
 use std::net::TcpStream;
 use std::thread::{self, JoinHandle};
 use crossbeam_channel::{unbounded, Receiver};
@@ -15,23 +14,19 @@ use websocket::{
 /// Tracks connection state between client and server.
 #[derive(Debug, Eq, PartialEq)]
 pub enum ConnectionState {
-    /// Client didn't request login.
-    Uninitialized,
-    /// Client requested login, server may not have responded yet.
-    SentLoginRequest,
-    /// Client sent idba, server may not have responded yet.
-    SentIdba,
-    /// Login successful. Gameplay started.
+    /// Client is logging into the server.
+    LoggingIn,
+    /// Server created a player in the world. Client can now send gameplay input.
     Playing,
-    /// Client or server have closed the connection.
+    /// Connection has been interrupted by client or server.
     Disconnected,
 }
 
 pub struct WebSocket {
     /// Sends data to server.
     sender: Writer<TcpStream>,
-    channel: Receiver<Msg>,
-    handle: JoinHandle<()>,
+    channel: Receiver<ServerMsg>,
+    pub handle: JoinHandle<()>,
     /// Connection state.
     pub state: ConnectionState,
 }
@@ -41,8 +36,6 @@ impl WebSocket {
         let mut headers = Headers::new();
         headers.set(Origin(ORIGIN.to_owned()));
 
-        println!("Setting up WebSocket...");
-
         // TODO: Return a Result from function to handle errors.
         let client = ClientBuilder::new(url.as_str())
             .unwrap() // TODO: ugly.
@@ -50,7 +43,7 @@ impl WebSocket {
             .connect_insecure()
             .unwrap(); // TODO: ugly.
         
-        let (mut receiver, sender) = client.split().unwrap(); // TODO: ugly.
+        let (mut receiver, mut sender) = client.split().unwrap(); // TODO: ugly.
 
         let (tx, rx) = unbounded();
 
@@ -64,7 +57,7 @@ impl WebSocket {
                     }
                 };
                 match message {
-                    OwnedMessage::Binary(m) => tx.send(m).unwrap(),
+                    OwnedMessage::Binary(m) => tx.send(ServerMsg::new(m)).unwrap(),
                     OwnedMessage::Close(_) => break,
                     _ => (),
                 }
@@ -72,22 +65,29 @@ impl WebSocket {
             
         });
 
-        println!("Done.");
+        Self::request_login(&mut sender);
 
         Self {
             sender,
             channel: rx,
             handle,
-            state: ConnectionState::Uninitialized,
+            state: ConnectionState::LoggingIn,
         }
     }
 
-    pub fn poll_messages(&mut self) -> VecDeque<Msg> {
+    pub fn poll_messages(&mut self) -> Vec<ServerMsg> {
         self.channel.try_iter().collect()
     }
 
-    pub fn send_message(&mut self, message: Msg) {
+    pub fn send_message(&mut self, message: ClientMsg) {
         if let Err(error) = self.sender.send_message(&OwnedMessage::Binary(message)) {
+            println!("Error: {}", error);
+        }
+    }
+
+    fn request_login(sender: &mut Writer<TcpStream>) {
+        const LOGIN_REQUEST_MSG: [u8; 1] = [0x63];
+        if let Err(error) = sender.send_message(&OwnedMessage::Binary(LOGIN_REQUEST_MSG.to_vec())) {
             println!("Error: {}", error);
         }
     }

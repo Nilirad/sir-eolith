@@ -1,6 +1,6 @@
-use crate::Msg;
+use crate::message::{ClientMsg, ServerMsg};
 
-pub fn decrypt_message(message: Msg) -> Msg {
+pub fn decrypt_message(message: ServerMsg) -> ClientMsg {
     /// Index of the first message byte containing data.
     const MESSAGE_PAYLOAD_START: usize = 3;
 
@@ -8,8 +8,8 @@ pub fn decrypt_message(message: Msg) -> Msg {
     let mut d = 0u8;
     let mut e = 23;
     
-    for (i, byte) in message.iter().skip(MESSAGE_PAYLOAD_START).enumerate() {
-        let mut b = *byte as i32;
+    for (i, byte) in message.into_iter().skip(MESSAGE_PAYLOAD_START).enumerate() {
+        let mut b = byte as i32;
         if b <= 96 {
             b += 32;
         }

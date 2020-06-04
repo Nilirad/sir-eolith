@@ -1,0 +1,157 @@
+use num_enum::TryFromPrimitive;
+use std::convert::TryFrom;
+
+pub type ClientMsg = Vec<u8>;
+
+pub enum Msg {
+    Server(ServerMsg),
+    Client(ClientMsg),
+}
+
+/// Server message opcode. Tells the client what type of operation it should perform.
+#[derive(Copy, Clone, Debug, Eq, PartialEq, TryFromPrimitive)]
+#[repr(u8)]
+pub enum Op {
+    /// Client must decrypt received data and send it back in order to log into the
+    /// server.
+    LoginInfo = '6' as u8,
+    /// Client must set some game parameters.
+    SetupGame = 'a' as u8,
+    /// Player died and connection will soon be closed.
+    GameOver = 'v' as u8,
+    /// A new snake must be loaded or an existing snake must be removed.
+    SnakeAction = 's' as u8,
+    /// A snake must be moved to a new location.
+    PosAbs = 'g' as u8,
+    /// A snake must be moved to a new location and a new section must be added.
+    GrowAbs = 'n' as u8,
+    /// A snake must be displaced by an offset.
+    PosRel = 'G' as u8,
+    /// A snake must be displaced by an offset and a new section must be added.
+    GrowRel = 'N' as u8,
+    /// A snake must lose a section.
+    Shrink = 'r' as u8,
+}
+
+/// A server message sent to the client. Contains additional data to help parsing data.
+pub struct ServerMsg {
+    /// The message raw data, in bytes.
+    data: Vec<u8>,
+    /// The message's cursor, where the data is read.
+    i: usize,
+}
+
+impl ServerMsg {
+    /// The index of the first byte of the message's payload.
+    const START: usize = 3;
+
+    /// Creates a new message from the given data.
+    pub fn new(data: Vec<u8>) -> Self {
+        debug_assert!(Self::START <= data.len());
+        Self {
+            data,
+            i: Self::START,
+        }
+    }
+
+    /// Returns the opcode of the message.
+    pub fn opcode(&self) -> Result<Op, char> {
+        match Op::try_from(self.data[2]) {
+            Ok(op) => Ok(op),
+            Err(_) => Err(self.data[2] as char),
+        }
+    }
+
+    /// Returns the length of the message.
+    pub fn len(&self) -> usize  {
+        self.data.len()
+    }
+
+    /// Returns a slice of the message's payload.
+    pub fn payload(&self) -> &[u8] {
+        &self.data[Self::START..]
+    }
+
+    /// Moves the current position to the given position.
+    pub fn go_to(&mut self, pos: usize) {
+        self.i = pos;
+        debug_assert!(self.i < self.data.len());
+    }
+
+    /// Rewinds the message to the starting position.
+    pub fn rewind(&mut self) {
+        self.i = Self::START;
+    }
+
+    /// Skips the given number of bytes.
+    pub fn skip(&mut self, count: usize) {
+        self.i += count;
+        debug_assert!(self.i < self.data.len());
+    }
+
+    /// Returns 1 byte of message data and moves the cursor.
+    pub fn read_u8(&mut self) -> u8 {
+        let result = self.data[self.i];
+        self.i += 1;
+        debug_assert!(self.i <= self.data.len());
+        result
+    }
+
+    /// Returns 2 bytes of message data and moves the cursor.
+    pub fn read_u16(&mut self) -> u16 {
+        let result = 
+            (self.data[self.i] as u16) << 8 
+            | self.data[self.i + 1] as u16;
+
+        self.i += 2;
+        debug_assert!(self.i <= self.data.len());
+        result
+    }
+
+    /// Returns 3 byte of message data and moves the cursor.
+    pub fn read_u24(&mut self) -> u32 {
+        let result =
+            (self.data[self.i] as u32) << 16 
+            | (self.data[self.i + 1] as u32) << 8 
+            | self.data[self.i + 2] as u32;
+        
+        self.i += 3;
+        debug_assert!(self.i <= self.data.len());
+        result
+    }
+}
+
+impl IntoIterator for ServerMsg {
+    type Item = u8;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.data.into_iter()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn read_u8() {
+        let mut m = ServerMsg::new(vec![23, 5, 9, 78]);
+        let result = m.read_u8();
+        assert_eq!(result, 78u8);
+    }
+
+    #[test]
+    fn read_u16() {
+        let mut m = ServerMsg::new(vec![23, 5, 9, 78, 92]);
+        let result = m.read_u16();
+        assert_eq!(result, 20060u16);
+    }
+
+    #[test]
+    fn read_u24() {
+        let mut m = ServerMsg::new(vec![23, 5, 9, 78, 92, 235, 255, 36]);
+        let result = m.read_u24();
+        assert_eq!(result, 5135595u32);
+    }
+}
