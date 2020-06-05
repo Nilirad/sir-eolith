@@ -9,7 +9,7 @@ fn main() -> GameResult<()> {
     let (ref mut ctx, events_loop) =
         &mut ContextBuilder::new("sir-eolith", "Nilirad")
         .window_setup(WindowSetup::default().title("sir-eolith"))
-        .window_mode(WindowMode::default().dimensions(WINDOW_X, WINDOW_Y))
+        .window_mode(WindowMode::default().dimensions(WINDOW_WIDTH, WINDOW_HEIGHT))
         .build()?;
     
     let (ws, ws_handle) = WebSocket::new(SERVER_URL.to_owned());
