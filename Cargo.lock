@@ -522,6 +522,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "derive_more"
+version = "0.99.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2127768764f1556535c01b5326ef94bd60ff08dcfbdc544d53e69ed155610f5d"
+dependencies = [
+ "proc-macro2 1.0.18",
+ "quote 1.0.6",
+ "syn 1.0.30",
+]
+
+[[package]]
 name = "directories"
 version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2385,6 +2396,7 @@ name = "sir-eolith"
 version = "0.1.0"
 dependencies = [
  "crossbeam-channel",
+ "derive_more",
  "ggez",
  "legion",
  "num_enum",

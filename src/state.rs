@@ -3,9 +3,10 @@ use crate::ws::{ConnectionState, WebSocket};
 use crate::message::{Op, ServerMsg};
 use crate::utils::decrypt_message;
 use std::time::Instant;
+use derive_more::Add;
 
-#[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
-struct Milliseconds(f32);
+#[derive(Debug, Copy, Clone, PartialOrd, PartialEq, Add)]
+struct Milliseconds(u128);
 
 #[derive(Debug, Copy, Clone)]
 enum PingStatus {
@@ -23,10 +24,12 @@ const PROVISIONAL_LGBA_MSG: [u8; 4] = [115, 10, 0, 0];
 const PING_MESSAGE: [u8; 1] = [0xFB];
 
 impl State {
+    const PING_TRESHOLD: Milliseconds = Milliseconds(250);
+
     pub fn new(connection: WebSocket) -> Self {
         Self {
             connection,
-            ping_status: PingStatus::GotResponse(Milliseconds(0.0)),
+            ping_status: PingStatus::GotResponse(Milliseconds(0)),
             last_update: Instant::now(),
         }
     }
@@ -45,8 +48,7 @@ impl State {
                 Op::GameOver => {}
                 Op::SnakeAction => {}
                 Op::PingResponse => {
-                    self.ping_status = PingStatus::GotResponse(Milliseconds(0.0));
-                    println!("pong");
+                    self.ping_status = PingStatus::GotResponse(Milliseconds(0));
                 }
                 Op::PosAbs | Op::GrowAbs | Op::PosRel | Op::GrowRel
                     => {}
@@ -55,9 +57,9 @@ impl State {
         }
     }
 
-    fn time_elapsed(&mut self) -> Milliseconds {
+    fn time_since_last_update(&mut self) -> Milliseconds {
         let now = Instant::now();
-        let delta = (now - self.last_update).as_millis() as f32;
+        let delta = (now - self.last_update).as_millis();
         self.last_update = now;
 
         Milliseconds(delta)
@@ -66,18 +68,17 @@ impl State {
 
 impl EventHandler for State {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
-        let delta = self.time_elapsed();
+        let delta = self.time_since_last_update();
         
         for message in self.connection.poll_messages() {
             self.handle_server_message(message);
         }
 
         if let PingStatus::GotResponse(since_last_pong) = self.ping_status {
-            let elapsed = Milliseconds(since_last_pong.0 + delta.0);
-            if elapsed >= Milliseconds(250.0) {
+            let elapsed = since_last_pong + delta;
+            if elapsed >= Self::PING_TRESHOLD {
                 self.connection.send(PING_MESSAGE.to_vec());
                 self.ping_status = PingStatus::WaitingResponse;
-                println!("ping");
             } else {
                 self.ping_status = PingStatus::GotResponse(elapsed);
             }

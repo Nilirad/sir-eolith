@@ -12,3 +12,4 @@ legion = { git = "https://github.com/TomGillen/legion" }
 websocket = { git = "https://github.com/Nilirad/rust-websocket", branch = "feat/ignore-sec-websocket-accept" }
 crossbeam-channel = "0.4.2"
 num_enum = "0.5.0"
+derive_more = "0.99.7"
