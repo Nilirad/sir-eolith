@@ -1,7 +1,8 @@
+mod message_handling;
+
 use crate::ggez_prelude::*;
-use crate::ws::{ConnectionState, WebSocket};
+use crate::ws::WebSocket;
 use crate::message::{Op, ServerMsg};
-use crate::utils::decrypt_message;
 use std::time::Instant;
 use derive_more::Add;
 
@@ -20,9 +21,6 @@ pub struct State {
     last_update: Instant,
 }
 
-const PROVISIONAL_LGBA_MSG: [u8; 4] = [115, 10, 0, 0];
-const PING_MESSAGE: [u8; 1] = [0xFB];
-
 impl State {
     const PING_TRESHOLD: Milliseconds = Milliseconds(250);
 
@@ -37,22 +35,14 @@ impl State {
     fn handle_server_message(&mut self, message: ServerMsg) {
         if let Ok(opcode) = message.opcode() {
             match opcode {
-                Op::LoginInfo => {
-                    self.connection.send(decrypt_message(message));
-                    self.connection.send(PROVISIONAL_LGBA_MSG.to_vec());
-                }
-                Op::SetupGame => {
-                    println!("Login successful!");
-                    self.connection.state = ConnectionState::Playing;
-                }
-                Op::GameOver => {}
-                Op::SnakeAction => {}
-                Op::PingResponse => {
-                    self.ping_status = PingStatus::GotResponse(Milliseconds(0));
-                }
+                Op::LoginInfo => self.handle_login_info(message),
+                Op::SetupGame => self.handle_setup_game(),
+                Op::GameOver => self.handle_game_over(),
+                Op::SnakeAction => self.handle_snake_action(),
+                Op::PingResponse => self.handle_ping_response(),
                 Op::PosAbs | Op::GrowAbs | Op::PosRel | Op::GrowRel
-                    => {}
-                Op::Shrink => {}
+                    => self.handle_positioning_and_growth(),
+                Op::Shrink => self.handle_shrink(),
             }    
         }
     }
@@ -66,6 +56,8 @@ impl State {
     }
 
     fn server_ping(&mut self, delta: Milliseconds) {
+        const PING_MESSAGE: [u8; 1] = [0xFB];
+
         if let PingStatus::GotResponse(since_last_pong) = self.ping_status {
             let elapsed = since_last_pong + delta;
             if elapsed >= Self::PING_TRESHOLD {
