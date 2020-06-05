@@ -64,6 +64,18 @@ impl State {
 
         Milliseconds(delta)
     }
+
+    fn server_ping(&mut self, delta: Milliseconds) {
+        if let PingStatus::GotResponse(since_last_pong) = self.ping_status {
+            let elapsed = since_last_pong + delta;
+            if elapsed >= Self::PING_TRESHOLD {
+                self.connection.send(PING_MESSAGE.to_vec());
+                self.ping_status = PingStatus::WaitingResponse;
+            } else {
+                self.ping_status = PingStatus::GotResponse(elapsed);
+            }
+        }
+    }
 }
 
 impl EventHandler for State {
@@ -74,15 +86,7 @@ impl EventHandler for State {
             self.handle_server_message(message);
         }
 
-        if let PingStatus::GotResponse(since_last_pong) = self.ping_status {
-            let elapsed = since_last_pong + delta;
-            if elapsed >= Self::PING_TRESHOLD {
-                self.connection.send(PING_MESSAGE.to_vec());
-                self.ping_status = PingStatus::WaitingResponse;
-            } else {
-                self.ping_status = PingStatus::GotResponse(elapsed);
-            }
-        }
+        self.server_ping(delta);
 
         Ok(())
     }
