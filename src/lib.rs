@@ -1,6 +1,11 @@
+#[macro_use]
+extern crate log;
+
 mod state;
 mod utils;
 mod message;
+mod components;
+mod snake;
 pub mod ws;
 
 pub mod ggez_prelude {
@@ -17,8 +22,13 @@ pub mod ggez_prelude {
             Mesh,
             Rect,
         },
-        nalgebra::{self as na, Point},
+        nalgebra as na,
     };
+}
+
+pub mod nalgebra_prelude {
+    pub use ggez::nalgebra as na;
+    pub type Point2 = na::Point2<f32>;
 }
 
 pub mod consts {

@@ -4,6 +4,8 @@ use sir_eolith::ggez_prelude::*;
 use sir_eolith::consts::*;
 
 fn main() -> GameResult<()> {
+    env_logger::init();
+
     let (ref mut ctx, events_loop) =
         &mut ContextBuilder::new("sir-eolith", "Nilirad")
         .window_setup(WindowSetup::default().title("sir-eolith"))

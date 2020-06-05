@@ -3,7 +3,10 @@ mod message_handling;
 use crate::ggez_prelude::*;
 use crate::ws::WebSocket;
 use crate::message::{Op, ServerMsg};
+use crate::components::*;
 use std::time::Instant;
+use legion::prelude::*;
+use legion::borrow::RefMut;
 use derive_more::Add;
 
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq, Add)]
@@ -17,8 +20,10 @@ enum PingStatus {
 
 pub struct State {
     connection: WebSocket,
+    world: World,
     ping_status: PingStatus,
     last_update: Instant,
+    player_set: bool,
 }
 
 impl State {
@@ -27,8 +32,10 @@ impl State {
     pub fn new(connection: WebSocket) -> Self {
         Self {
             connection,
+            world: World::new(),
             ping_status: PingStatus::GotResponse(Milliseconds(0)),
             last_update: Instant::now(),
+            player_set: false,
         }
     }
 
@@ -38,11 +45,11 @@ impl State {
                 Op::LoginInfo => self.handle_login_info(message),
                 Op::SetupGame => self.handle_setup_game(),
                 Op::GameOver => self.handle_game_over(),
-                Op::SnakeAction => self.handle_snake_action(),
+                Op::SnakeAction => self.handle_snake_action(message),
                 Op::PingResponse => self.handle_ping_response(),
                 Op::PosAbs | Op::GrowAbs | Op::PosRel | Op::GrowRel
-                    => self.handle_positioning_and_growth(),
-                Op::Shrink => self.handle_shrink(),
+                    => self.handle_positioning_and_growth(message),
+                Op::Shrink => self.handle_shrink(message),
             }    
         }
     }
@@ -67,6 +74,26 @@ impl State {
                 self.ping_status = PingStatus::GotResponse(elapsed);
             }
         }
+    }
+
+    fn find_snake_with_id(&self, id: Id) -> Option<Entity> {
+        let query = <(Read<Id>,)>::query();
+        for (entity, (snake_id,)) in query.iter_entities(&self.world) {
+            if *snake_id == id {
+                return Some(entity);
+            }
+        }
+        None
+    }
+
+    fn get_snake_components(&mut self, id: Id) -> Option<(RefMut<'_, Pos>, RefMut<'_, SnakeSegments>)> {
+        let query = <(Read<Id>, Write<Pos>, Write<SnakeSegments>)>::query();
+        for (snake_id, pos, segments) in query.iter_mut(&mut self.world) {
+            if *snake_id == id {
+                return Some((pos, segments));
+            }
+        }
+        None
     }
 }
 

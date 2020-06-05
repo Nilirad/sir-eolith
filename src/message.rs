@@ -86,6 +86,10 @@ impl ServerMsg {
         debug_assert!(self.i < self.data.len());
     }
 
+    pub fn has_reached_end(&self) -> bool {
+        self.i >= self.data.len()
+    }
+
     /// Returns 1 byte of message data and moves the cursor.
     pub fn read_u8(&mut self) -> u8 {
         let result = self.data[self.i];
