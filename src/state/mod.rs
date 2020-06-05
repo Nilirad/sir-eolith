@@ -1,4 +1,5 @@
 mod message_handling;
+mod draw;
 
 use crate::ggez_prelude::*;
 use crate::ws::WebSocket;
@@ -86,7 +87,7 @@ impl State {
         None
     }
 
-    fn get_snake_components(&mut self, id: Id) -> Option<(RefMut<'_, Pos>, RefMut<'_, SnakeSegments>)> {
+    fn get_snake_components(&mut self, id: Id) -> Option<(RefMut<Pos>, RefMut<SnakeSegments>)> {
         let query = <(Read<Id>, Write<Pos>, Write<SnakeSegments>)>::query();
         for (snake_id, pos, segments) in query.iter_mut(&mut self.world) {
             if *snake_id == id {
@@ -112,6 +113,8 @@ impl EventHandler for State {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         graphics::clear(ctx, graphics::BLACK);
+        self.draw_game(ctx)?;
+        
         graphics::present(ctx)
     }
 

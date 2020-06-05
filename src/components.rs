@@ -1,11 +1,14 @@
 use crate::snake::SnakeSegment;
 use crate::nalgebra_prelude::*;
 
-#[derive(Copy, Clone, PartialEq)]
-pub enum Tags {
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum PlayerType {
     You,
-    OtherPlayer,
+    Other,
 }
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct PlayerTag(pub PlayerType);
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct Id(pub u16);
@@ -32,5 +35,9 @@ impl SnakeSegments {
 
     pub fn remove_tail(&mut self) {
         self.0.remove(0); // TODO: Checking if exist? Use VecDeque?
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<SnakeSegment> {
+        self.0.iter()
     }
 }

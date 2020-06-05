@@ -72,8 +72,15 @@ impl State {
                     segments.push(SnakeSegment::new(section_x, section_y));
                 }
 
+                let tag = if self.player_set {
+                    PlayerTag(PlayerType::Other)
+                } else {
+                    self.player_set = true; // TODO: This side effect is not the best thing...
+                    PlayerTag(PlayerType::You)
+                };
+
                 self.world.insert(
-                    (if self.player_set { Tags::OtherPlayer } else { Tags::You },),
+                    (tag,),
                     vec![(
                         (
                             id,
