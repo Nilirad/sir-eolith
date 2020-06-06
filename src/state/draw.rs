@@ -13,6 +13,7 @@ impl State {
     pub fn draw_game(&mut self, ctx: &mut Context) -> GameResult {        
         self.update_viewport(ctx)?;
         self.draw_snakes(ctx)?;
+        self.draw_food(ctx)?;
 
         Ok(())
     }
@@ -43,10 +44,34 @@ impl State {
                 graphics::draw(
                     ctx,
                     &circle,
-                    (na::Point2::new(0.0, 0.0),)
+                    (na::Point2::new(0.0, 0.0),),
                 )?;
             }
         }
+        Ok(())
+    }
+
+    fn draw_food(&mut self, ctx: &mut Context) -> GameResult {
+        const FOOD_COLOR: Color = Color{ r: 1.0, g: 1.0, b: 0.0, a: 1.0 };
+
+        let query = <(Read<Pos>,)>::query()
+            .filter(tag::<FoodTag>());
+        for (pos,) in query.iter(&mut self.world) {
+            let circle = graphics::Mesh::new_circle(
+                ctx,
+                graphics::DrawMode::fill(),
+                na::Point2::new(pos.0.x, pos.0.y),
+                10.0,
+                2.0,
+                FOOD_COLOR,
+            )?;
+            graphics::draw(
+                ctx,
+                &circle,
+                (na::Point2::new(0.0, 0.0),),
+            )?;
+        }
+
         Ok(())
     }
     
