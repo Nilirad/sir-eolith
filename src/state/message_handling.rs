@@ -4,10 +4,9 @@ use crate::ws::ConnectionState;
 use crate::message::{ServerMsg, Op};
 use crate::snake::SnakeSegment;
 use crate::components::*;
+use crate::nalgebra_prelude::*;
 
 impl State {
-    
-
     pub fn handle_login_info(&mut self, message: ServerMsg) {
         const PROVISIONAL_LGBA_MSG: [u8; 4] = [115, 10, 0, 0];
 
@@ -15,7 +14,11 @@ impl State {
         self.connection.send(PROVISIONAL_LGBA_MSG.to_vec());
     }
 
-    pub fn handle_setup_game(&mut self) {
+    pub fn handle_setup_game(&mut self, mut message: ServerMsg) {
+        self.grd = message.read_u24() as f32;
+        let _mscps = message.read_u16();
+        self.sector_size = message.read_u16() as f32;
+        
         info!("Logged into server.");
         self.connection.state = ConnectionState::Playing;
     }
@@ -140,7 +143,14 @@ impl State {
     }
 
     pub fn handle_remove_sector_food(&mut self, mut message: ServerMsg) {
+        let world_sector = na::Point2::new(
+            message.read_u8(),
+            message.read_u8(),
+        );
 
+        for food in self.find_foods_in_sector(world_sector) {
+            self.world.delete(food);
+        }
     }
 
     pub fn handle_load_sector_food(&mut self, mut message: ServerMsg) {
@@ -161,5 +171,19 @@ impl State {
         } else {
             warn!("Does this even happen?");
         }
+    }
+
+    pub fn handle_eat_food(&mut self, mut message: ServerMsg) {
+        let pos = Pos::new(
+            message.read_u16() as f32,
+            message.read_u16() as f32,
+        );
+        
+        if let Some(food) = self.find_food(pos) {
+            self.world.delete(food);
+        } else {
+            warn!("Food ({}, {}) not found.", pos.0.x, pos.0.y);
+        }
+        
     }
 }

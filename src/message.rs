@@ -34,9 +34,13 @@ pub enum Op {
     SnakeFood = 'b' as u8,
     /// Load a single food spawned naturally.
     SpawnFood = 'f' as u8,
+    /// Unload a single food that has just been eaten.
+    EatFood = 'c' as u8,
 }
 
 pub type ClientMsg = Vec<u8>;
+
+// TODO: Make higher level reads, like `read_pos`, or `read_id`.
 
 /// A server message sent to the client. Contains additional data to help parsing data.
 pub struct ServerMsg {

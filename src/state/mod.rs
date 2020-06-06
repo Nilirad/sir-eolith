@@ -7,6 +7,7 @@ use crate::ws::{WebSocket, ConnectionState};
 use crate::message::{Op, ServerMsg};
 use crate::components::*;
 use crate::consts::*;
+use crate::nalgebra_prelude::*;
 use std::time::Instant;
 use legion::prelude::*;
 use legion::borrow::RefMut;
@@ -28,6 +29,8 @@ pub struct State {
     ping_status: PingStatus,
     last_update: Instant,
     player_set: bool,
+    grd: f32,
+    sector_size: f32,
 }
 
 impl State {
@@ -41,6 +44,8 @@ impl State {
             ping_status: PingStatus::GotResponse(Milliseconds(0)),
             last_update: Instant::now(),
             player_set: false,
+            grd: 16384.0, // TODO: magic number.
+            sector_size: 480.0, // TODO: magic number.
         }
     }
 
@@ -48,7 +53,7 @@ impl State {
         if let Ok(opcode) = message.opcode() {
             match opcode {
                 Op::LoginInfo => self.handle_login_info(message),
-                Op::SetupGame => self.handle_setup_game(),
+                Op::SetupGame => self.handle_setup_game(message),
                 Op::GameOver => self.handle_game_over(),
                 Op::SnakeAction => self.handle_snake_action(message),
                 Op::PingResponse => self.handle_ping_response(),
@@ -58,6 +63,7 @@ impl State {
                 Op::RemoveSectorFood => self.handle_remove_sector_food(message),
                 Op::LoadSectorFood => self.handle_load_sector_food(message),
                 Op::SnakeFood | Op::SpawnFood => self.handle_load_single_food(message),
+                Op::EatFood => self.handle_eat_food(message),
             }    
         }
     }
@@ -102,6 +108,33 @@ impl State {
             }
         }
         None
+    }
+
+    fn find_food(&self, pos: Pos) -> Option<Entity> {
+        let query = <(Read<Pos>,)>::query()
+            .filter(tag::<FoodTag>());
+        for (food, (food_pos,)) in query.iter_entities(&self.world) {
+            if *food_pos == pos {
+                return Some(food);
+            }
+        }
+        None
+    }
+
+    fn find_foods_in_sector(&self, world_sector: na::Point2<u8>) -> Vec<Entity> {
+        let query = <(Read<Pos>,)>::query()
+            .filter(tag::<FoodTag>());
+        let mut result = Vec::new();
+        for (food, (food_pos,)) in query.iter_entities(&self.world) {
+            let sector_x = (food_pos.0.x / self.sector_size).floor() as u8;
+            let sector_y = (food_pos.0.y / self.sector_size).floor() as u8;
+
+            if sector_x == world_sector.x && sector_y == world_sector.y {
+                result.push(food);
+            }
+        }
+
+        result
     }
 }
 
