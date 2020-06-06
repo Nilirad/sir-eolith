@@ -55,6 +55,9 @@ impl State {
                 Op::PosAbs | Op::GrowAbs | Op::PosRel | Op::GrowRel
                     => self.handle_positioning_and_growth(message),
                 Op::Shrink => self.handle_shrink(message),
+                Op::RemoveSectorFood => self.handle_remove_sector_food(message),
+                Op::LoadSectorFood => self.handle_load_sector_food(message),
+                Op::SnakeFood | Op::SpawnFood => self.handle_load_single_food(message),
             }    
         }
     }

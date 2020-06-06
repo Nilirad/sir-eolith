@@ -10,6 +10,9 @@ pub enum PlayerType {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct PlayerTag(pub PlayerType);
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct FoodTag;
+
 #[derive(Copy, Clone, PartialEq)]
 pub struct Id(pub u16);
 
