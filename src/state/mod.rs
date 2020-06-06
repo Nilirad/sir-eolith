@@ -1,17 +1,19 @@
 mod message_handling;
 mod draw;
+mod controller;
 
 use crate::ggez_prelude::*;
-use crate::ws::WebSocket;
+use crate::ws::{WebSocket, ConnectionState};
 use crate::message::{Op, ServerMsg};
 use crate::components::*;
+use crate::consts::*;
 use std::time::Instant;
 use legion::prelude::*;
 use legion::borrow::RefMut;
-use derive_more::Add;
+use derive_more::{Add, AddAssign};
 
-#[derive(Debug, Copy, Clone, PartialOrd, PartialEq, Add)]
-struct Milliseconds(u128);
+#[derive(Debug, Copy, Clone, PartialOrd, PartialEq, Add, AddAssign)]
+pub struct Milliseconds(u128); // TODO: Move outside this module.
 
 #[derive(Debug, Copy, Clone)]
 enum PingStatus {
@@ -22,6 +24,7 @@ enum PingStatus {
 pub struct State {
     connection: WebSocket,
     world: World,
+    controller: controller::SnakeController,
     ping_status: PingStatus,
     last_update: Instant,
     player_set: bool,
@@ -34,6 +37,7 @@ impl State {
         Self {
             connection,
             world: World::new(),
+            controller: controller::SnakeController::new(),
             ping_status: PingStatus::GotResponse(Milliseconds(0)),
             last_update: Instant::now(),
             player_set: false,
@@ -108,6 +112,10 @@ impl EventHandler for State {
 
         self.server_ping(delta);
 
+        if self.connection.state == ConnectionState::Playing {
+            self.controller.move_snake(delta, &mut self.connection);
+        }
+
         Ok(())
     }
 
@@ -116,6 +124,21 @@ impl EventHandler for State {
         self.draw_game(ctx)?;
         
         graphics::present(ctx)
+    }
+
+    /// Handles mouse movement, updating the mouse position.
+    fn mouse_motion_event(&mut self, _ctx: &mut Context, x: f32, y: f32, _dx: f32, _dy: f32) {
+        self.controller.set_mouse_pos(x - (WINDOW_WIDTH / 2.0), y - (WINDOW_HEIGHT / 2.0));
+    }
+
+    /// Handles mouse button presses.
+    fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, _x: f32, _y: f32) {
+        self.controller.set_mouse_pressed(button == MouseButton::Left);
+    }
+
+    /// Handles mouse buttons being lifted.
+    fn mouse_button_up_event(&mut self, _ctx: &mut Context, _button: MouseButton, _x: f32, _y: f32) {
+        self.controller.set_mouse_pressed(false);
     }
 
     fn quit_event(&mut self, _ctx: &mut Context) -> bool {

@@ -94,6 +94,7 @@ impl WebSocket {
         if let Err(error) = self.sender.send_message(&OwnedMessage::Close(None)) {
             error!("Cannot close connection: {}", error);
         }
+        self.state = ConnectionState::Disconnected;
     }
 
     fn request_login(sender: &mut Writer<TcpStream>) {

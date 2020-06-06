@@ -14,7 +14,7 @@ pub mod ggez_prelude {
         ContextBuilder,
         GameResult,
         conf::{WindowSetup, WindowMode},
-        event::{self, EventHandler},
+        event::{self, EventHandler, MouseButton},
         graphics::{
             self,
             set_screen_coordinates,
