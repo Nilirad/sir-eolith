@@ -51,12 +51,16 @@ impl WebSocket {
                 let message = match message {
                     Ok(m) => m,
                     Err(e) => {
-                        println!("Receive Loop: {:?}", e);
+                        error!("[ws receiver] {:?}", e);
                         break;
                     }
                 };
                 match message {
-                    OwnedMessage::Binary(m) => tx.send(ServerMsg::new(m)).unwrap(),
+                    OwnedMessage::Binary(m) => {
+                        if let Err(error) = tx.send(ServerMsg::new(m)) {
+                            error!("[ws receiver] Cannot send message to main thread: {}", error);
+                        }
+                    }
                     OwnedMessage::Close(_) => break,
                     _ => (),
                 }
@@ -82,20 +86,20 @@ impl WebSocket {
 
     pub fn send(&mut self, message: ClientMsg) {
         if let Err(error) = self.sender.send_message(&OwnedMessage::Binary(message)) {
-            println!("Error: {}", error);
+            error!("Sending error: {}", error);
         }
     }
 
     pub fn close(&mut self) {
         if let Err(error) = self.sender.send_message(&OwnedMessage::Close(None)) {
-            println!("Cannot close connection: {}", error);
+            error!("Cannot close connection: {}", error);
         }
     }
 
     fn request_login(sender: &mut Writer<TcpStream>) {
         const LOGIN_REQUEST_MSG: [u8; 1] = [0x63];
         if let Err(error) = sender.send_message(&OwnedMessage::Binary(LOGIN_REQUEST_MSG.to_vec())) {
-            println!("Error: {}", error);
+            error!("Error: {}", error);
         }
     }
 }

@@ -21,9 +21,11 @@ fn main() -> GameResult<()> {
 
     event::run(ctx, events_loop, state)?;
 
-    if let Err(error) = ws_handle.join() {
-        println!("Error joining websocket thread: {:?}", error);
+    match ws_handle.join() {
+        Ok(_) => info!("WebSocket thread joined."),
+        Err(error) => error!("Error joining websocket thread: {:?}", error),
     }
 
+    info!("Terminating application.");
     Ok(())
 }

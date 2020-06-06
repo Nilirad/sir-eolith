@@ -16,12 +16,12 @@ impl State {
     }
 
     pub fn handle_setup_game(&mut self) {
-        println!("Login successful!");
+        info!("Logged into server.");
         self.connection.state = ConnectionState::Playing;
     }
 
     pub fn handle_game_over(&mut self) {
-        self.connection.close();
+        self.connection.close(); // TODO: Wait some time before closing.
     }
 
     pub fn handle_snake_action(&mut self, mut message: ServerMsg) {
@@ -89,12 +89,14 @@ impl State {
                         )
                     )]
                 );
+                trace!("Loaded snake {}", id.0);
             }
             Action::Unload => {
                 if let Some(snake) = self.find_snake_with_id(id) {
                     self.world.delete(snake);
+                    trace!("Unloaded snake {}", id.0);
                 } else {
-                    error!("[snake unload action] Snake {} not found.", id.0);
+                    warn!("[snake unload action] Snake {} not found.", id.0);
                 }
             }
         }
@@ -102,6 +104,7 @@ impl State {
 
     pub fn handle_ping_response(&mut self) {
         self.ping_status = PingStatus::GotResponse(Milliseconds(0));
+        trace!("Pong");
     }
 
     pub fn handle_positioning_and_growth(&mut self, mut message: ServerMsg) {
@@ -123,7 +126,7 @@ impl State {
                 segments.remove_tail();
             }
         } else {
-            error!("[pos/grow] Snake {} not found.", id.0);
+            warn!("[pos/grow] Snake {} not found.", id.0);
         }
     }
 
@@ -132,7 +135,7 @@ impl State {
         if let Some((_pos, mut segments)) = self.get_snake_components(id) {
             segments.remove_tail();
         } else {
-            error!("[shrink] Snake {} not found.", id.0);
+            warn!("[shrink] Snake {} not found.", id.0);
         }
     }
 }
