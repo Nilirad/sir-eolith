@@ -16,7 +16,7 @@ use websocket::{
 pub enum ConnectionState {
     /// Client is logging into the server.
     LoggingIn,
-    /// Server created a player in the world. Client can now send gameplay input.
+    /// Client is logged in and can send gameplay input.
     Playing,
     /// Connection has been interrupted by client or server.
     Disconnected,
@@ -25,6 +25,7 @@ pub enum ConnectionState {
 pub struct WebSocket {
     /// Sends data to server.
     sender: Writer<TcpStream>,
+    /// Receives messages from the Websocket listener thread.
     channel: Receiver<ServerMsg>,
     /// Connection state.
     pub state: ConnectionState,
@@ -46,7 +47,7 @@ impl WebSocket {
 
         let (tx, rx) = unbounded();
 
-        let thread_handle = thread::spawn(move || {
+        let thread_handle = thread::spawn(move || { // TODO: See if you can simplify.
             for message in receiver.incoming_messages() {
                 let message = match message {
                     Ok(m) => m,
@@ -91,10 +92,12 @@ impl WebSocket {
     }
 
     pub fn close(&mut self) {
-        if let Err(error) = self.sender.send_message(&OwnedMessage::Close(None)) {
-            error!("Cannot close connection: {}", error);
+        if self.state != ConnectionState::Disconnected {
+            if let Err(error) = self.sender.send_message(&OwnedMessage::Close(None)) {
+                error!("Cannot close connection: {}", error);
+            }
+            self.state = ConnectionState::Disconnected;
         }
-        self.state = ConnectionState::Disconnected;
     }
 
     fn request_login(sender: &mut Writer<TcpStream>) {
