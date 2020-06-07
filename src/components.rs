@@ -10,10 +10,13 @@ pub enum PlayerType {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct PlayerTag(pub PlayerType);
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct FoodTag;
+
 #[derive(Copy, Clone, PartialEq)]
 pub struct Id(pub u16);
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Pos(pub Point2);
 
 impl Pos {
