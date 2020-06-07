@@ -20,6 +20,7 @@ pub mod ggez_prelude {
             set_screen_coordinates,
             Color,
             Mesh,
+            MeshBuilder,
             Rect,
         },
         nalgebra as na,
