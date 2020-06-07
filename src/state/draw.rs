@@ -12,8 +12,8 @@ impl State {
     /// Draws the gameplay elements.
     pub fn draw_game(&mut self, ctx: &mut Context) -> GameResult {        
         self.update_viewport(ctx)?;
-        self.draw_snakes(ctx)?;
         self.draw_food(ctx)?;
+        self.draw_snakes(ctx)?;
 
         Ok(())
     }
