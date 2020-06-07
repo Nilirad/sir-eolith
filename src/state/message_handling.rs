@@ -154,7 +154,19 @@ impl State {
     }
 
     pub fn handle_load_sector_food(&mut self, mut message: ServerMsg) {
-        
+        let mut foods = Vec::new();
+        while !message.has_reached_end() {
+            let _unknown = message.read_u8();
+            let pos = Pos::new(
+                message.read_u16() as f32,
+                message.read_u16() as f32,
+            );
+            let _size = message.read_u8() as f32 / 5.0;
+            
+            foods.push((pos,));
+        }
+
+        self.world.insert((FoodTag,), foods);
     }
 
     pub fn handle_load_single_food(&mut self, mut message: ServerMsg) {
