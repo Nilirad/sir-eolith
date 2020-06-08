@@ -1,12 +1,11 @@
 use super::{State, PingStatus, Milliseconds};
 use crate::utils::decrypt_message;
-use crate::ws::ConnectionState;
-use crate::message::{ServerMsg, Op};
+use crate::message::{ServerMsg, Op, ConnectionState};
 use crate::snake::SnakeSegment;
 use crate::components::*;
 use crate::nalgebra_prelude::*;
 
-impl State {
+impl<'manager> State<'manager> {
     pub fn handle_login_info(&mut self, message: ServerMsg) {
         const PROVISIONAL_LGBA_MSG: [u8; 4] = [115, 10, 0, 0];
 
@@ -20,7 +19,7 @@ impl State {
         self.sector_size = message.read_u16() as f32;
         
         info!("Logged into server.");
-        self.connection.state = ConnectionState::Playing;
+        self.connection.set_state(ConnectionState::Playing);
     }
 
     pub fn handle_game_over(&mut self) {

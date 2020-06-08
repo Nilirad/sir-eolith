@@ -16,8 +16,8 @@ fn main() -> GameResult<()> {
         .window_mode(WindowMode::default().dimensions(WINDOW_WIDTH, WINDOW_HEIGHT))
         .build()?;
     
-    let (ws, ws_handle) = WebSocket::new(SERVER_URL.to_owned());
-    let state = &mut State::new(ws);
+    let (mut ws, ws_handle) = WebSocket::new(SERVER_URL.to_owned());
+    let state = &mut State::new(&mut ws);
 
     event::run(ctx, events_loop, state)?;
 

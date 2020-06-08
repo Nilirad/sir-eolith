@@ -3,8 +3,7 @@ mod draw;
 mod controller;
 
 use crate::ggez_prelude::*;
-use crate::ws::{WebSocket, ConnectionState};
-use crate::message::{Op, ServerMsg};
+use crate::message::{Op, ServerMsg, Connection, ConnectionState};
 use crate::components::*;
 use crate::consts::*;
 use std::time::Instant;
@@ -21,8 +20,8 @@ enum PingStatus {
     GotResponse(Milliseconds),
 }
 
-pub struct State {
-    connection: WebSocket,
+pub struct State<'manager> {
+    connection: &'manager mut dyn Connection,
     world: World,
     controller: controller::SnakeController,
     ping_status: PingStatus,
@@ -32,10 +31,10 @@ pub struct State {
     sector_size: f32,
 }
 
-impl State {
+impl<'manager> State<'manager> {
     const PING_TRESHOLD: Milliseconds = Milliseconds(250);
 
-    pub fn new(connection: WebSocket) -> Self {
+    pub fn new(connection: &'manager mut dyn Connection) -> Self {
         Self {
             connection,
             world: World::new(),
@@ -137,7 +136,7 @@ impl State {
     }
 }
 
-impl EventHandler for State {
+impl<'manager> EventHandler for State<'manager> {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
         let delta = self.time_since_last_update();
         
@@ -147,8 +146,8 @@ impl EventHandler for State {
 
         self.server_ping(delta);
 
-        if self.connection.state == ConnectionState::Playing {
-            self.controller.move_snake(delta, &mut self.connection);
+        if self.connection.state() == ConnectionState::Playing {
+            self.controller.move_snake(delta, self.connection);
         }
 
         Ok(())

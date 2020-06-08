@@ -1,5 +1,5 @@
 use crate::consts::*;
-use crate::message::{ClientMsg, ServerMsg};
+use crate::message::{ClientMsg, ServerMsg, Connection, ConnectionState};
 use std::net::TcpStream;
 use std::thread::{self, JoinHandle};
 use crossbeam_channel::{unbounded, Receiver};
@@ -10,17 +10,6 @@ use websocket::{
     sender::Writer,
     OwnedMessage,
 };
-
-/// Tracks connection state between client and server.
-#[derive(Debug, Eq, PartialEq)]
-pub enum ConnectionState {
-    /// Client is logging into the server.
-    LoggingIn,
-    /// Client is logged in and can send gameplay input.
-    Playing,
-    /// Connection has been interrupted by client or server.
-    Disconnected,
-}
 
 pub struct WebSocket {
     /// Sends data to server.
@@ -81,17 +70,26 @@ impl WebSocket {
         )
     }
 
-    pub fn poll_messages(&mut self) -> Vec<ServerMsg> {
+    fn request_login(sender: &mut Writer<TcpStream>) {
+        const LOGIN_REQUEST_MSG: [u8; 1] = [0x63];
+        if let Err(error) = sender.send_message(&OwnedMessage::Binary(LOGIN_REQUEST_MSG.to_vec())) {
+            error!("Error: {}", error);
+        }
+    }
+}
+
+impl Connection for WebSocket {
+    fn poll_messages(&mut self) -> Vec<ServerMsg> {
         self.channel.try_iter().collect()
     }
 
-    pub fn send(&mut self, message: ClientMsg) {
+    fn send(&mut self, message: ClientMsg) {
         if let Err(error) = self.sender.send_message(&OwnedMessage::Binary(message)) {
             error!("Sending error: {}", error);
         }
     }
 
-    pub fn close(&mut self) {
+    fn close(&mut self) {
         if self.state != ConnectionState::Disconnected {
             if let Err(error) = self.sender.send_message(&OwnedMessage::Close(None)) {
                 error!("Cannot close connection: {}", error);
@@ -100,10 +98,11 @@ impl WebSocket {
         }
     }
 
-    fn request_login(sender: &mut Writer<TcpStream>) {
-        const LOGIN_REQUEST_MSG: [u8; 1] = [0x63];
-        if let Err(error) = sender.send_message(&OwnedMessage::Binary(LOGIN_REQUEST_MSG.to_vec())) {
-            error!("Error: {}", error);
-        }
+    fn state(&self) -> ConnectionState {
+        self.state
+    }
+
+    fn set_state(&mut self, state: ConnectionState) {
+        self.state = state;
     }
 }
