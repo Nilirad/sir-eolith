@@ -6,6 +6,7 @@ mod utils;
 mod message;
 mod components;
 mod snake;
+mod playback;
 pub mod ws;
 
 pub mod ggez_prelude {
