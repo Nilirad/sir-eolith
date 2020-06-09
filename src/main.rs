@@ -5,6 +5,7 @@ use sir_eolith::State;
 use sir_eolith::ws::WebSocket;
 use sir_eolith::ggez_prelude::*;
 use sir_eolith::consts::*;
+use sir_eolith::get_playback;
 
 fn main() -> GameResult<()> {
     env_logger::init();
@@ -16,15 +17,17 @@ fn main() -> GameResult<()> {
         .window_mode(WindowMode::default().dimensions(WINDOW_WIDTH, WINDOW_HEIGHT))
         .build()?;
     
-    let (mut ws, ws_handle) = WebSocket::new(SERVER_URL.to_owned());
-    let state = &mut State::new(&mut ws);
+    /* let (mut ws, ws_handle) = WebSocket::new(SERVER_URL.to_owned());
+    let state = &mut State::new(&mut ws); */
+    let mut playback = get_playback();
+    let ref mut state = State::new(&mut playback);
 
     event::run(ctx, events_loop, state)?;
 
-    match ws_handle.join() {
+    /* match ws_handle.join() {
         Ok(_) => info!("WebSocket thread joined."),
         Err(error) => error!("Error joining websocket thread: {:?}", error),
-    }
+    } */
 
     info!("Terminating application.");
     Ok(())

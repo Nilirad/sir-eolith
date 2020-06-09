@@ -31,6 +31,10 @@ pub fn frames() -> Result<Frames, Box<dyn Error>> {
     }
 }
 
+pub fn get_playback() -> PlaybackSession {
+    PlaybackSession::new(frames().unwrap().messages)
+}
+
 pub struct PlaybackSession {
     frames: Vec<PlaybackFrame>,
     start_time: Instant,
