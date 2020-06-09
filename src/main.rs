@@ -11,24 +11,35 @@ fn main() -> GameResult<()> {
     env_logger::init();
     info!("Logger initialized.");
 
+    let mut playback = false;
+    let args: std::env::Args = std::env::args();
+    for arg in args.skip(1) {
+        if arg == "playback" {
+            playback = true;
+        }
+    }
+
     let (ref mut ctx, events_loop) =
         &mut ContextBuilder::new("sir-eolith", "Nilirad")
         .window_setup(WindowSetup::default().title("sir-eolith"))
         .window_mode(WindowMode::default().dimensions(WINDOW_WIDTH, WINDOW_HEIGHT))
         .build()?;
-    
-    /* let (mut ws, ws_handle) = WebSocket::new(SERVER_URL.to_owned());
-    let state = &mut State::new(&mut ws); */
-    let mut playback = get_playback();
-    let ref mut state = State::new(&mut playback);
 
-    event::run(ctx, events_loop, state)?;
+    if playback {
+        let mut playback = get_playback();
+        let ref mut state = State::new(&mut playback);
+        event::run(ctx, events_loop, state)?;
+    } else {
+        let (mut ws, ws_handle) = WebSocket::new(SERVER_URL.to_owned());
+        let state = &mut State::new(&mut ws);
+        
+        event::run(ctx, events_loop, state)?;
 
-    /* match ws_handle.join() {
-        Ok(_) => info!("WebSocket thread joined."),
-        Err(error) => error!("Error joining websocket thread: {:?}", error),
-    } */
-
+        match ws_handle.join() {
+            Ok(_) => info!("WebSocket thread joined."),
+            Err(error) => error!("Error joining websocket thread: {:?}", error),
+        }
+    }
     info!("Terminating application.");
     Ok(())
 }
