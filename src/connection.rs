@@ -143,6 +143,30 @@ impl IntoIterator for ServerMsg {
     }
 }
 
+/// Tracks connection state between client and server.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum ConnectionState {
+    /// Client is logging into the server.
+    LoggingIn,
+    /// Client is logged in and can send gameplay input.
+    Playing,
+    /// Connection has been interrupted by client or server.
+    Disconnected,
+    /// There is no client-server communication. The client only receives server
+    /// messages.
+    Unilateral,
+}
+
+/// The implementor of this trait is something that streams messages to the user code
+/// and forwards messages to a third party (a server, for example).
+pub trait Connection {
+    fn poll_messages(&mut self) -> Vec<ServerMsg>;
+    fn send(&mut self, message: ClientMsg);
+    fn close(&mut self);
+    fn state(&self) -> ConnectionState;
+    fn set_state(&mut self, state: ConnectionState);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

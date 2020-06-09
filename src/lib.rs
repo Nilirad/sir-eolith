@@ -3,9 +3,10 @@ extern crate log;
 
 mod state;
 mod utils;
-mod message;
+mod connection;
 mod components;
 mod snake;
+mod playback;
 pub mod ws;
 
 pub mod ggez_prelude {
@@ -43,3 +44,4 @@ pub mod consts {
 }
 
 pub use state::State;
+pub use playback::get_playback;

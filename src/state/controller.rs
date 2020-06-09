@@ -1,7 +1,7 @@
 //! Allows the user to send snake movement requests to the server.
 
 use crate::nalgebra_prelude::*;
-use crate::ws::WebSocket;
+use crate::connection::Connection;
 use super::Milliseconds;
 use std::f32::consts::PI;
 
@@ -74,7 +74,7 @@ impl SnakeController {
     }
 
     /// Moves the snake by sending steering and boosting messages to the server.
-    pub fn move_snake(&mut self, delta: Milliseconds, connection: &mut WebSocket) {
+    pub fn move_snake(&mut self, delta: Milliseconds, connection: &mut dyn Connection) {
         
         
         self.handle_snake_steer(delta, connection);
@@ -82,7 +82,7 @@ impl SnakeController {
     }
 
     /// Handles snake steering.
-    fn handle_snake_steer(&mut self, delta: Milliseconds, connection: &mut WebSocket) {
+    fn handle_snake_steer(&mut self, delta: Milliseconds, connection: &mut dyn Connection) {
         const STEER_COOLDOWN: Milliseconds = Milliseconds(100);
 
         self.steer_cooldown += delta;
@@ -99,7 +99,7 @@ impl SnakeController {
     }
 
     /// Handles snake boosting.
-    fn handle_snake_boost(&mut self, delta: Milliseconds, connection: &mut WebSocket) {
+    fn handle_snake_boost(&mut self, delta: Milliseconds, connection: &mut dyn Connection) {
         const BOOST_COOLDOWN: Milliseconds = Milliseconds(150);
 
         self.boost_cooldown += delta;
