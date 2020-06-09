@@ -26,7 +26,7 @@ fn main() -> GameResult<()> {
         .build()?;
 
     if playback {
-        let mut playback = get_playback();
+        let mut playback = get_playback("373.json");
         let ref mut state = State::new(&mut playback);
         event::run(ctx, events_loop, state)?;
     } else {

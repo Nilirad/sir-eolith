@@ -20,19 +20,19 @@ pub struct Frames{
     messages: Vec<PlaybackFrame>,
 }
 
-pub fn frames() -> Result<Frames, Box<dyn Error>> {
-    let  path = Path::new("res/373.json");
+pub fn frames(filename: &str) -> Result<Vec<PlaybackFrame>, Box<dyn Error>> {
+    let  path = Path::new("res").join(Path::new(filename));
     let mut file = File::open(&path)?;
     let mut json_string = String::new();
     file.read_to_string(&mut json_string)?;
     match serde_json::from_str::<Frames>(json_string.as_str()) {
-        Ok(frames) => Ok(frames),
+        Ok(frames) => Ok(frames.messages),
         Err(error) => Err(Box::new(std::io::Error::new(std::io::ErrorKind::InvalidData, error))),
     }
 }
 
-pub fn get_playback() -> PlaybackSession {
-    PlaybackSession::new(frames().unwrap().messages)
+pub fn get_playback(filename: &str) -> PlaybackSession {
+    PlaybackSession::new(frames(filename).unwrap())
 }
 
 pub struct PlaybackSession {
@@ -91,7 +91,6 @@ mod tests {
 
     #[test]
     fn get_frames() {
-        let _frames = frames().unwrap();
-        
+        let _frames = frames("373.json").unwrap();
     }
 }
