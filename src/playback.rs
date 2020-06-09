@@ -70,17 +70,15 @@ impl Connection for PlaybackSession {
     /// This connection type does not forward any input.
     fn send(&mut self, _message: ClientMsg) {}
 
-    fn close(&mut self) {
-        todo!();
-    }
+    /// There is no connection to close, so this function does nothing.
+    fn close(&mut self) {}
 
     fn state(&self) -> ConnectionState {
-        unimplemented!();
+        ConnectionState::Unilateral
     }
 
-    fn set_state(&mut self, state: ConnectionState) {
-        unimplemented!();
-    }
+    /// Ignores any state setting request from the client.
+    fn set_state(&mut self, _state: ConnectionState) {}
 }
 
 #[cfg(test)]
