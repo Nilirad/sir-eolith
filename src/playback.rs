@@ -1,4 +1,4 @@
-use crate::message::{Connection, ConnectionState, ClientMsg, ServerMsg};
+use crate::connection::{Connection, ConnectionState, ClientMsg, ServerMsg};
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;

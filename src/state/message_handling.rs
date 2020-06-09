@@ -1,6 +1,6 @@
 use super::{State, PingStatus, Milliseconds};
 use crate::utils::decrypt_message;
-use crate::message::{ServerMsg, Op, ConnectionState};
+use crate::connection::{ServerMsg, Op, ConnectionState};
 use crate::snake::SnakeSegment;
 use crate::components::*;
 use crate::nalgebra_prelude::*;

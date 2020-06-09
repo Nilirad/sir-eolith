@@ -3,7 +3,7 @@ mod draw;
 mod controller;
 
 use crate::ggez_prelude::*;
-use crate::message::{Op, ServerMsg, Connection, ConnectionState};
+use crate::connection::{Op, ServerMsg, Connection, ConnectionState};
 use crate::components::*;
 use crate::consts::*;
 use std::time::Instant;

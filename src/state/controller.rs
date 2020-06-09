@@ -1,7 +1,7 @@
 //! Allows the user to send snake movement requests to the server.
 
 use crate::nalgebra_prelude::*;
-use crate::message::Connection;
+use crate::connection::Connection;
 use super::Milliseconds;
 use std::f32::consts::PI;
 

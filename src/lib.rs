@@ -3,7 +3,7 @@ extern crate log;
 
 mod state;
 mod utils;
-mod message;
+mod connection;
 mod components;
 mod snake;
 mod playback;

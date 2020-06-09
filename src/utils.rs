@@ -1,4 +1,4 @@
-use crate::message::{ClientMsg, ServerMsg};
+use crate::connection::{ClientMsg, ServerMsg};
 
 pub fn decrypt_message(message: ServerMsg) -> ClientMsg {
     /// Index of the first message byte containing data.
