@@ -49,3 +49,7 @@ pub fn decrypt_message(message: ServerMsg) -> ClientMsg {
     )
     .collect()
 }
+
+pub fn base64_to_bytes(data: String) -> Vec<u8> {
+    unimplemented!();
+}

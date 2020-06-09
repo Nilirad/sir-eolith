@@ -1,12 +1,17 @@
+use crate::message::{Connection, ConnectionState, ClientMsg, ServerMsg};
+use crate::utils::base64_to_bytes;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
-use serde::Deserialize;
 use std::error::Error;
+use std::time::Instant;
+use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 pub struct PlaybackFrame {
+    // UNIX timestamp of the recorded frame.
     time: f64,
+    // The server message in Base64 format.
     data: String,
 }
 
@@ -23,6 +28,57 @@ pub fn frames() -> Result<Frames, Box<dyn Error>> {
     match serde_json::from_str::<Frames>(json_string.as_str()) {
         Ok(frames) => Ok(frames),
         Err(error) => Err(Box::new(std::io::Error::new(std::io::ErrorKind::InvalidData, error))),
+    }
+}
+
+pub struct PlaybackSession {
+    frames: Vec<PlaybackFrame>,
+    start_time: Instant,
+    first_frame_time: f64,
+}
+
+impl PlaybackSession {
+    pub fn new(frames: Vec<PlaybackFrame>) -> Self {
+        let first_frame_time = frames[0].time;
+        Self {
+            frames,
+            start_time: Instant::now(),
+            first_frame_time,
+        }
+    } 
+}
+
+impl Connection for PlaybackSession {
+    fn poll_messages(&mut self) -> Vec<ServerMsg> {
+        let elapsed_time = (Instant::now() - self.start_time).as_secs_f64();
+
+        let mut drain_index = 0usize;
+        for frame in self.frames.iter() {
+            if elapsed_time >= frame.time - self.first_frame_time {
+                drain_index += 1;
+            } else {
+                break; // frames are ordered by ascending time.
+            }
+        }
+
+        self.frames.drain(..drain_index)
+            .map(|f| ServerMsg::new(base64_to_bytes(f.data)))
+            .collect()
+    }
+
+    /// This connection type does not forward any input.
+    fn send(&mut self, _message: ClientMsg) {}
+
+    fn close(&mut self) {
+        todo!();
+    }
+
+    fn state(&self) -> ConnectionState {
+        unimplemented!();
+    }
+
+    fn set_state(&mut self, state: ConnectionState) {
+        unimplemented!();
     }
 }
 

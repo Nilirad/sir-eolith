@@ -152,6 +152,9 @@ pub enum ConnectionState {
     Playing,
     /// Connection has been interrupted by client or server.
     Disconnected,
+    /// There is no client-server communication. The client only receives server
+    /// messages.
+    Unilateral,
 }
 
 /// The implementor of this trait is something that streams messages to the user code
