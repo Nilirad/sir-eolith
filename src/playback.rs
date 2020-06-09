@@ -1,11 +1,11 @@
 use crate::message::{Connection, ConnectionState, ClientMsg, ServerMsg};
-use crate::utils::base64_to_bytes;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 use std::error::Error;
 use std::time::Instant;
 use serde::Deserialize;
+use base64::decode;
 
 #[derive(Deserialize, Debug)]
 pub struct PlaybackFrame {
@@ -61,8 +61,9 @@ impl Connection for PlaybackSession {
             }
         }
 
+        // TODO: That unwrap(). Can we trust Chrome Dev Tools?
         self.frames.drain(..drain_index)
-            .map(|f| ServerMsg::new(base64_to_bytes(f.data)))
+            .map(|f| ServerMsg::new(decode(f.data).unwrap()))
             .collect()
     }
 
