@@ -1,4 +1,4 @@
-use crate::connection::{Connection, ConnectionState, ClientMsg, ServerMsg};
+use crate::connection::{Connection, ConnectionState, ServerMsg};
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
@@ -71,18 +71,9 @@ impl Connection for PlaybackSession {
             .collect()
     }
 
-    /// This connection type does not forward any input.
-    fn send(&mut self, _message: ClientMsg) {}
-
-    /// There is no connection to close, so this function does nothing.
-    fn close(&mut self) {}
-
     fn state(&self) -> ConnectionState {
         ConnectionState::Unilateral
     }
-
-    /// Ignores any state setting request from the client.
-    fn set_state(&mut self, _state: ConnectionState) {}
 }
 
 #[cfg(test)]

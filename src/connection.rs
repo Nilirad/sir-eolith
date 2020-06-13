@@ -161,10 +161,10 @@ pub enum ConnectionState {
 /// and forwards messages to a third party (a server, for example).
 pub trait Connection {
     fn poll_messages(&mut self) -> Vec<ServerMsg>;
-    fn send(&mut self, message: ClientMsg);
-    fn close(&mut self);
+    fn send(&mut self, _message: ClientMsg) {}
+    fn close(&mut self) {}
     fn state(&self) -> ConnectionState;
-    fn set_state(&mut self, state: ConnectionState);
+    fn set_state(&mut self, _state: ConnectionState) {}
 }
 
 #[cfg(test)]
