@@ -1,4 +1,4 @@
-use super::{State, PingStatus, Milliseconds};
+use super::{State, PingStatus};
 use crate::connection::{ClientMsg, ServerMsg, Op, ConnectionState};
 use crate::types::*;
 use crate::nalgebra_prelude::*;

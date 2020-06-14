@@ -3,6 +3,7 @@ extern crate log;
 
 mod state;
 mod types;
+mod controller;
 pub mod connection;
 
 pub mod ggez_prelude {
