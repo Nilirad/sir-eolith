@@ -4,7 +4,7 @@ extern crate log;
 use client::State;
 use client::ggez_prelude::*;
 use connections::ws::WebSocket;
-use connections::playback::get_playback;
+use connections::replay::load_replay;
 use std::path::Path;
 
 const SERVER_URL: &str = "ws://149.202.210.168:444/slither";
@@ -35,8 +35,8 @@ fn main() -> GameResult<()> {
         2 => {
             let filename = args[1].as_str();
             let path = Path::new("res").join(filename);
-            let mut playback = get_playback(path);
-            let ref mut state = State::new(&mut playback);
+            let mut replay = load_replay(path);
+            let ref mut state = State::new(&mut replay);
             event::run(ctx, events_loop, state)?;
         }
         _ => (), // TODO: show help.

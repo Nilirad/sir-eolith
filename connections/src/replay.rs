@@ -8,7 +8,7 @@ use serde::Deserialize;
 use base64::decode;
 
 #[derive(Deserialize, Debug)]
-pub struct PlaybackFrame {
+pub struct Frame {
     // UNIX timestamp of the recorded frame.
     time: f64,
     // The server message in Base64 format.
@@ -17,10 +17,11 @@ pub struct PlaybackFrame {
 
 #[derive(Deserialize, Debug)]
 pub struct Frames{
-    messages: Vec<PlaybackFrame>,
+    messages: Vec<Frame>,
 }
 
-pub fn frames(path: PathBuf) -> Result<Vec<PlaybackFrame>, Box<dyn Error>> {
+// TODO: The following two functions should be one, right?
+pub fn frames(path: PathBuf) -> Result<Vec<Frame>, Box<dyn Error>> {
     let mut file = File::open(&path)?;
     let mut json_string = String::new();
     file.read_to_string(&mut json_string)?;
@@ -30,18 +31,18 @@ pub fn frames(path: PathBuf) -> Result<Vec<PlaybackFrame>, Box<dyn Error>> {
     }
 }
 
-pub fn get_playback(path: PathBuf) -> PlaybackSession {
-    PlaybackSession::new(frames(path).unwrap())
+pub fn load_replay(path: PathBuf) -> Replay {
+    Replay::new(frames(path).unwrap())
 }
 
-pub struct PlaybackSession {
-    frames: Vec<PlaybackFrame>,
+pub struct Replay {
+    frames: Vec<Frame>,
     start_time: Instant,
     first_frame_time: f64,
 }
 
-impl PlaybackSession {
-    pub fn new(frames: Vec<PlaybackFrame>) -> Self {
+impl Replay {
+    pub fn new(frames: Vec<Frame>) -> Self {
         let first_frame_time = frames[0].time;
         Self {
             frames,
@@ -51,7 +52,7 @@ impl PlaybackSession {
     } 
 }
 
-impl Connection for PlaybackSession {
+impl Connection for Replay {
     fn poll_messages(&mut self) -> Vec<ServerMsg> {
         let elapsed_time = (Instant::now() - self.start_time).as_secs_f64();
 
