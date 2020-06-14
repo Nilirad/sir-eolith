@@ -1,5 +1,5 @@
 #[macro_use]
 extern crate log;
 
-pub mod playback;
+pub mod replay;
 pub mod ws;
