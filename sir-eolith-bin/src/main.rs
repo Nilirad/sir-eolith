@@ -35,7 +35,6 @@ fn main() -> GameResult<()> {
         2 => {
             let filename = args[1].as_str();
             let path = Path::new("res").join(filename);
-            println!("{}", path.display());
             let mut playback = get_playback(path);
             let ref mut state = State::new(&mut playback);
             event::run(ctx, events_loop, state)?;
