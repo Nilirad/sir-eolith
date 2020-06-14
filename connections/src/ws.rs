@@ -1,4 +1,3 @@
-use client::consts::*;
 use client::connection::{ClientMsg, ServerMsg, Connection, ConnectionState};
 use std::net::TcpStream;
 use std::thread::{self, JoinHandle};
@@ -21,9 +20,11 @@ pub struct WebSocket {
 }
 
 impl WebSocket {
+    const ORIGIN: &'static str = "http://slither.io";
+
     pub fn new(url: String) -> (Self, JoinHandle<()>) {
         let mut headers = Headers::new();
-        headers.set(Origin(ORIGIN.to_owned()));
+        headers.set(Origin(Self::ORIGIN.to_owned()));
 
         // TODO: Return a Result from function to handle errors.
         let client = ClientBuilder::new(url.as_str())

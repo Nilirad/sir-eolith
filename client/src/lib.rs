@@ -31,14 +31,9 @@ pub mod nalgebra_prelude {
     pub type Point2 = na::Point2<f32>;
 }
 
-pub mod consts {
-    use crate::ggez_prelude::*;
-
-    pub const WINDOW_WIDTH: f32 = 1280.0;
+mod consts {
+    pub const WINDOW_WIDTH: f32 = 1280.0; // TODO: Remove these. Retrieve dynamically.
     pub const WINDOW_HEIGHT: f32 = 720.0;
-    pub const BACKGROUND_COLOR: Color = graphics::BLACK;
-    pub const ORIGIN: &str = "http://slither.io";
-    pub const SERVER_URL: &str = "ws://149.202.210.168:444/slither";
 }
 
 pub use state::State;
