@@ -12,7 +12,7 @@ use legion::borrow::RefMut;
 use derive_more::{Add, AddAssign};
 
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq, Add, AddAssign)]
-pub struct Milliseconds(u128); // TODO: Move outside this module.
+pub struct Milliseconds(u128);
 
 #[derive(Debug, Copy, Clone)]
 enum PingStatus {

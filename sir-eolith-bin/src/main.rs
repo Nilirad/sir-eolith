@@ -3,9 +3,12 @@ extern crate log;
 
 use client::State;
 use client::ggez_prelude::*;
-use client::consts::*;
 use connections::ws::WebSocket;
 use connections::playback::get_playback;
+
+const SERVER_URL: &str = "ws://149.202.210.168:444/slither";
+const WINDOW_WIDTH: f32 = 1280.0;
+const WINDOW_HEIGHT: f32 = 720.0;
 
 fn main() -> GameResult<()> {
     env_logger::init();
