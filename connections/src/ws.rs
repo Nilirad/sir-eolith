@@ -1,5 +1,5 @@
-use crate::consts::*;
-use crate::connection::{ClientMsg, ServerMsg, Connection, ConnectionState};
+use client::consts::*;
+use client::connection::{ClientMsg, ServerMsg, Connection, ConnectionState};
 use std::net::TcpStream;
 use std::thread::{self, JoinHandle};
 use crossbeam_channel::{unbounded, Receiver};

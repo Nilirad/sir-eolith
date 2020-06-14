@@ -1,11 +1,11 @@
 #[macro_use]
 extern crate log;
 
-use sir_eolith::State;
-use sir_eolith::ws::WebSocket;
-use sir_eolith::ggez_prelude::*;
-use sir_eolith::consts::*;
-use sir_eolith::get_playback;
+use client::State;
+use client::ggez_prelude::*;
+use client::consts::*;
+use connections::ws::WebSocket;
+use connections::playback::get_playback;
 
 fn main() -> GameResult<()> {
     env_logger::init();
