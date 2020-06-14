@@ -5,6 +5,7 @@ use client::State;
 use client::ggez_prelude::*;
 use connections::ws::WebSocket;
 use connections::playback::get_playback;
+use std::path::Path;
 
 const SERVER_URL: &str = "ws://149.202.210.168:444/slither";
 const WINDOW_WIDTH: f32 = 1280.0;
@@ -32,7 +33,10 @@ fn main() -> GameResult<()> {
             }
         }
         2 => {
-            let mut playback = get_playback(args[1].as_str());
+            let filename = args[1].as_str();
+            let path = Path::new("res").join(filename);
+            println!("{}", path.display());
+            let mut playback = get_playback(path);
             let ref mut state = State::new(&mut playback);
             event::run(ctx, events_loop, state)?;
         }

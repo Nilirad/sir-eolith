@@ -4,15 +4,11 @@ mod controller;
 
 use crate::ggez_prelude::*;
 use crate::connection::{Op, ServerMsg, Connection, ConnectionState};
-use crate::components::*;
+use crate::types::*;
 use crate::consts::*;
 use std::time::Instant;
 use legion::prelude::*;
 use legion::borrow::RefMut;
-use derive_more::{Add, AddAssign};
-
-#[derive(Debug, Copy, Clone, PartialOrd, PartialEq, Add, AddAssign)]
-pub struct Milliseconds(u128);
 
 #[derive(Debug, Copy, Clone)]
 enum PingStatus {

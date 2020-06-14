@@ -1,5 +1,17 @@
-use crate::snake::SnakeSegment;
 use crate::nalgebra_prelude::*;
+use derive_more::{Add, AddAssign};
+
+#[derive(Debug, Copy, Clone, PartialOrd, PartialEq, Add, AddAssign)]
+pub struct Milliseconds(pub u128);
+
+#[derive(Copy, Clone)]
+pub struct SnakeSegment(pub Point2);
+
+impl SnakeSegment {
+    pub fn new(x: f32, y: f32) -> Self {
+        Self(Point2::new(x, y))
+    }
+}
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum PlayerType {
