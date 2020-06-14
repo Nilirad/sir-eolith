@@ -8,7 +8,7 @@ use legion::prelude::*;
 /// out the view will be.
 const FIELD_OF_VIEW: f32 = 3.0;
 
-impl<'manager> State<'manager> {
+impl<'connection> State<'connection> {
     /// Draws the gameplay elements.
     pub fn draw_game(&mut self, ctx: &mut Context) -> GameResult {
         self.update_viewport(ctx)?;

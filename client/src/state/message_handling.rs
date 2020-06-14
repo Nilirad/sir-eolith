@@ -3,7 +3,7 @@ use crate::connection::{ClientMsg, ServerMsg, Op, ConnectionState};
 use crate::types::*;
 use crate::nalgebra_prelude::*;
 
-impl<'manager> State<'manager> {
+impl<'connection> State<'connection> {
     pub fn handle_login_info(&mut self, message: ServerMsg) {
         const PROVISIONAL_LGBA_MSG: [u8; 4] = [115, 10, 0, 0];
 
