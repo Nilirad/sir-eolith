@@ -21,7 +21,6 @@ pub struct Frames{
 }
 
 pub fn frames(path: PathBuf) -> Result<Vec<PlaybackFrame>, Box<dyn Error>> {
-    println!("{}", path.display());
     let mut file = File::open(&path)?;
     let mut json_string = String::new();
     file.read_to_string(&mut json_string)?;
