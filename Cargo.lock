@@ -327,6 +327,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f86c952727a495bda7abaf09bafdee1a939194dd793d9a8e26281df55ac43b00"
 
 [[package]]
+name = "client"
+version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "ggez",
+ "legion",
+ "log 0.4.8",
+ "num_enum",
+]
+
+[[package]]
 name = "cloudabi"
 version = "0.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -355,6 +366,19 @@ name = "color_quant"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0dbbb57365263e881e805dc77d94697c9118fd94d8da011240555aa7b23445bd"
+
+[[package]]
+name = "connections"
+version = "0.1.0"
+dependencies = [
+ "base64 0.12.1",
+ "client",
+ "crossbeam-channel",
+ "log 0.4.8",
+ "serde",
+ "serde_json",
+ "websocket",
+]
 
 [[package]]
 name = "constant_time_eq"
@@ -2452,20 +2476,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "sir-eolith"
+name = "sir-eolith-bin"
 version = "0.1.0"
 dependencies = [
- "base64 0.12.1",
- "crossbeam-channel",
- "derive_more",
+ "client",
+ "connections",
  "env_logger",
- "ggez",
- "legion",
  "log 0.4.8",
- "num_enum",
- "serde",
- "serde_json",
- "websocket",
 ]
 
 [[package]]
