@@ -16,8 +16,8 @@ enum PingStatus {
     GotResponse(Milliseconds),
 }
 
-pub struct State<'manager> {
-    connection: &'manager mut dyn Connection,
+pub struct State<'connection> {
+    connection: &'connection mut dyn Connection,
     world: World,
     controller: controller::SnakeController,
     ping_status: PingStatus,
@@ -27,10 +27,10 @@ pub struct State<'manager> {
     sector_size: f32,
 }
 
-impl<'manager> State<'manager> {
+impl<'connection> State<'connection> {
     const PING_TRESHOLD: Milliseconds = Milliseconds(250);
 
-    pub fn new(connection: &'manager mut dyn Connection) -> Self {
+    pub fn new(connection: &'connection mut dyn Connection) -> Self {
         Self {
             connection,
             world: World::new(),
@@ -132,7 +132,7 @@ impl<'manager> State<'manager> {
     }
 }
 
-impl<'manager> EventHandler for State<'manager> {
+impl<'connection> EventHandler for State<'connection> {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
         let delta = self.time_since_last_update();
         
