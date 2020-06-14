@@ -1,11 +1,11 @@
 mod message_handling;
 mod draw;
-mod controller;
 
 use crate::ggez_prelude::*;
 use crate::connection::{Op, ServerMsg, Connection, ConnectionState};
 use crate::types::*;
 use crate::consts::*;
+use crate::controller::SnakeController;
 use std::time::Instant;
 use legion::prelude::*;
 use legion::borrow::RefMut;
@@ -19,7 +19,7 @@ enum PingStatus {
 pub struct State<'connection> {
     connection: &'connection mut dyn Connection,
     world: World,
-    controller: controller::SnakeController,
+    controller: SnakeController,
     ping_status: PingStatus,
     last_update: Instant,
     player_set: bool,
@@ -34,7 +34,7 @@ impl<'connection> State<'connection> {
         Self {
             connection,
             world: World::new(),
-            controller: controller::SnakeController::new(),
+            controller: SnakeController::new(),
             ping_status: PingStatus::GotResponse(Milliseconds(0)),
             last_update: Instant::now(),
             player_set: false,
