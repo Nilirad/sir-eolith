@@ -1,7 +1,7 @@
 use client::connection::{Connection, ConnectionState, ServerMsg};
 use std::fs::File;
 use std::io::prelude::*;
-use std::path::Path;
+use std::path::PathBuf;
 use std::error::Error;
 use std::time::Instant;
 use serde::Deserialize;
@@ -20,8 +20,8 @@ pub struct Frames{
     messages: Vec<PlaybackFrame>,
 }
 
-pub fn frames(filename: &str) -> Result<Vec<PlaybackFrame>, Box<dyn Error>> {
-    let  path = Path::new("res").join(Path::new(filename));
+pub fn frames(path: PathBuf) -> Result<Vec<PlaybackFrame>, Box<dyn Error>> {
+    println!("{}", path.display());
     let mut file = File::open(&path)?;
     let mut json_string = String::new();
     file.read_to_string(&mut json_string)?;
@@ -31,8 +31,8 @@ pub fn frames(filename: &str) -> Result<Vec<PlaybackFrame>, Box<dyn Error>> {
     }
 }
 
-pub fn get_playback(filename: &str) -> PlaybackSession {
-    PlaybackSession::new(frames(filename).unwrap())
+pub fn get_playback(path: PathBuf) -> PlaybackSession {
+    PlaybackSession::new(frames(path).unwrap())
 }
 
 pub struct PlaybackSession {
@@ -76,12 +76,15 @@ impl Connection for PlaybackSession {
     }
 }
 
-#[cfg(test)]
+// TODO: Determine where this should be. Probably you should have a playback session
+// stored somewhere in this module.
+/* #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn get_frames() {
-        let _frames = frames("373.json").unwrap();
+        let path = std::path::Path::new("res").join("373.json");
+        let _frames = frames(path).unwrap();
     }
-}
+} */

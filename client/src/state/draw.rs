@@ -1,6 +1,6 @@
 use crate::consts::*;
 use crate::ggez_prelude::*;
-use crate::components::*;
+use crate::types::*;
 use super::State;
 use legion::prelude::*;
 
