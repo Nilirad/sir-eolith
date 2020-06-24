@@ -125,6 +125,27 @@ impl<'connection> State<'connection> {
             if !growing {
                 segments.remove_tail();
             }
+
+            // TODO: Horrible, non-idiomatic code, directly translated from the horrible
+            // JavaScript source.
+            let mut last = None;
+            let mut w = 0.0;
+            let mut n = 0usize;
+            for segment in segments.0.iter_mut().rev().skip(2) {
+                last = match last {
+                    None => Some(segment.0),
+                    Some(last_segment) => {
+                        n += 1;
+                        if n <= 4 {
+                            w = 0.43 * n as f32 / 4.0;
+                        }
+                        segment.0.x += (last_segment.x - segment.0.x) * w;
+                        segment.0.y += (last_segment.y - segment.0.y) * w;
+                        Some(segment.0)
+                    }
+                }
+            }
+
         } else {
             warn!("[pos/grow] Snake {} not found.", id.0);
         }
