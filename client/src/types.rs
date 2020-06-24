@@ -37,7 +37,7 @@ impl Pos {
     }
 }
 
-pub struct SnakeSegments(Vec<SnakeSegment>);
+pub struct SnakeSegments(pub Vec<SnakeSegment>);
 
 impl SnakeSegments {
     pub fn new() -> Self {
