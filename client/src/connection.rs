@@ -81,6 +81,11 @@ impl ServerMsg {
         &self.data[Self::START..]
     }
 
+    /// Returns the cursor position.
+    pub fn pos(&self) -> usize {
+        self.i
+    }
+
     /// Moves the current position to the given position.
     pub fn go_to(&mut self, pos: usize) {
         self.i = pos;

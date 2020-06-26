@@ -33,8 +33,8 @@ impl<'connection> State<'connection> {
             Action::Load => {
                 message.go_to(18);
                 let pos = Pos::new(
-                    message.read_u24() as f32,
-                    message.read_u24() as f32
+                    message.read_u24() as f32 / 5.0,
+                    message.read_u24() as f32 / 5.0,
                 );
                 
                 let nickname_length = message.read_u8();
