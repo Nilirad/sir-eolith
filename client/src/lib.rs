@@ -27,7 +27,7 @@ pub mod ggez_prelude {
 
 pub mod nalgebra_prelude {
     pub use ggez::nalgebra as na;
-    pub type Point2 = na::Point2<f32>;
+    pub type Vec2 = na::Vector2<f32>;
 }
 
 mod consts {
