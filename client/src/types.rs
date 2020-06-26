@@ -5,11 +5,11 @@ use derive_more::{Add, AddAssign};
 pub struct Milliseconds(pub u128);
 
 #[derive(Copy, Clone)]
-pub struct SnakeSegment(pub Point2);
+pub struct SnakeSegment(pub Vec2);
 
 impl SnakeSegment {
     pub fn new(x: f32, y: f32) -> Self {
-        Self(Point2::new(x, y))
+        Self(Vec2::new(x, y))
     }
 }
 
@@ -29,11 +29,11 @@ pub struct FoodTag;
 pub struct Id(pub u16);
 
 #[derive(Copy, Clone, PartialEq)]
-pub struct Pos(pub Point2);
+pub struct Pos(pub Vec2);
 
 impl Pos {
     pub fn new(x: f32, y: f32) -> Self {
-        Self(Point2::new(x, y))
+        Self(Vec2::new(x, y))
     }
 }
 

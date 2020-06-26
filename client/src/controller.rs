@@ -8,7 +8,7 @@ use std::f32::consts::PI;
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Mouse {
     /// The x and y coordinates of the mouse.
-    pub pos: Point2,
+    pub pos: Vec2,
     /// The left button of the mouse: true if pressed, false otherwise.
     pub pressed: bool,
 }
@@ -16,7 +16,7 @@ pub struct Mouse {
 impl Mouse {
     fn new() -> Self {
         Self {
-            pos: Point2::new(0.0, 0.0),
+            pos: Vec2::new(0.0, 0.0),
             pressed: false,
         }
     }
@@ -58,7 +58,7 @@ impl SnakeController {
 
     /// Sets the mouse position and checks if it has changed.
     pub fn set_mouse_pos(&mut self, x: f32, y: f32) {
-        let new_pos = Point2::new(x, y);
+        let new_pos = Vec2::new(x, y);
         if self.mouse.pos != new_pos {
             self.mouse.pos = new_pos;
             self.mouse_pos_changed = true;
@@ -118,7 +118,7 @@ impl SnakeController {
 /// Returns the angle, in radians, in the range `[0, 2π)`, from the x-axis to the given
 /// point. The direction of the angle is determined by the rotation from the x-axis to
 /// the y-axis.
-fn angle(point: Point2) -> f32 {
+fn angle(point: Vec2) -> f32 {
     let (x, y) = (point.x, point.y);
 
     let angle = y.atan2(x);
