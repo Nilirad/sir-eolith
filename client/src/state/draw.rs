@@ -30,8 +30,8 @@ impl<'connection> State<'connection> {
 
     /// Draws the snakes.
     fn draw_snakes(&mut self, mut mesh_builder: &mut MeshBuilder, valid_builder: &mut bool) {
-        let query = <(Read<Id>, Read<SnakeSegments>)>::query();
-        for (id, segments) in query.iter(&mut self.world) {
+        let query = <(Read<Id>, Read<Pos>, Read<SnakeSegments>)>::query();
+        for (id, pos, segments) in query.iter(&mut self.world) {
             // TODO: Wrap in function `color_from_id()`
             let color = {
                 let r = id.0 & 0xFF00;
@@ -50,8 +50,16 @@ impl<'connection> State<'connection> {
                     2.0,
                     color,
                 );
+                
                 *valid_builder = true;
             }
+            mesh_builder = mesh_builder.circle(
+                graphics::DrawMode::fill(),
+                na::Point::from(pos.0),
+                20.0,
+                2.0,
+                Color::new(0.0, 0.5, 0.0, 1.0),
+            );
         }
     }
 
