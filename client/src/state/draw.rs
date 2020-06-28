@@ -40,13 +40,14 @@ impl<'connection> State<'connection> {
                 let g = g as f32 / std::u16::MAX as f32;
                 ggez::graphics::Color::new(r, g, 1.0, 1.0)
             };
+            let width = 29.0 * (1.0 + (segments.0.len() - 2) as f32 / 106.0).min(6.0);
             for segment in segments.iter() {
                 let screen_x = segment.0.x;
                 let screen_y = segment.0.y;
                 mesh_builder = mesh_builder.circle(
                     graphics::DrawMode::fill(),
                     na::Point2::new(screen_x, screen_y),
-                    30.0,
+                    width,
                     2.0,
                     color,
                 );
@@ -56,7 +57,7 @@ impl<'connection> State<'connection> {
             mesh_builder = mesh_builder.circle(
                 graphics::DrawMode::fill(),
                 na::Point::from(pos.0),
-                20.0,
+                width / 1.5,
                 2.0,
                 Color::new(0.0, 0.5, 0.0, 1.0),
             );
