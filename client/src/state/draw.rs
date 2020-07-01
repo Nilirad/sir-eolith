@@ -14,22 +14,30 @@ impl<'connection> State<'connection> {
         self.update_viewport(ctx)?;
 
         let mut mesh_builder = MeshBuilder::new();
-        let mut valid_builder = false;
 
-        self.draw_food(&mut mesh_builder, &mut valid_builder);
-        self.draw_snakes(&mut mesh_builder, &mut valid_builder);
+        self.draw_border(&mut mesh_builder);
+        self.draw_food(&mut mesh_builder);
+        self.draw_snakes(&mut mesh_builder);
 
-        //debug!("{:?}", mesh_builder);
-        if valid_builder {
-            let mesh = mesh_builder.build(ctx)?;
-            graphics::draw(ctx, &mesh, (na::Point2::new(0.0, 0.0),))?;
-        }
+        let mesh = mesh_builder.build(ctx)?;
+        graphics::draw(ctx, &mesh, (na::Point2::new(0.0, 0.0),))?;
 
         Ok(())
     }
 
+    #[allow(unused_assignments)]
+    fn draw_border(&mut self, mut mesh_builder: &mut MeshBuilder) {
+        mesh_builder = mesh_builder.circle(
+            graphics::DrawMode::fill(),
+            na::Point2::new(21600.0, 21600.0),
+            21600.0 - 435.0,
+            0.00001,
+            Color::new(0.2, 0.2, 0.2, 1.0),
+        );
+    }
+
     /// Draws the snakes.
-    fn draw_snakes(&mut self, mut mesh_builder: &mut MeshBuilder, valid_builder: &mut bool) {
+    fn draw_snakes(&mut self, mut mesh_builder: &mut MeshBuilder) {
         let query = <(Read<Id>, Read<Pos>, Read<SnakeSegments>)>::query();
         for (id, pos, segments) in query.iter(&mut self.world) {
             // TODO: Wrap in function `color_from_id()`
@@ -51,8 +59,6 @@ impl<'connection> State<'connection> {
                     2.0,
                     color,
                 );
-                
-                *valid_builder = true;
             }
             mesh_builder = mesh_builder.circle(
                 graphics::DrawMode::fill(),
@@ -64,7 +70,7 @@ impl<'connection> State<'connection> {
         }
     }
 
-    fn draw_food(&mut self, mut mesh_builder: &mut MeshBuilder, valid_builder: &mut bool) {
+    fn draw_food(&mut self, mut mesh_builder: &mut MeshBuilder) {
         const FOOD_COLOR: Color = Color{ r: 1.0, g: 1.0, b: 0.0, a: 1.0 };
 
         let query = <(Read<Pos>,)>::query()
@@ -77,7 +83,6 @@ impl<'connection> State<'connection> {
                 2.0,
                 FOOD_COLOR,
             );
-            *valid_builder = true;
         }
     }
     
