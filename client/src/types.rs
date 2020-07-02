@@ -5,9 +5,9 @@ use derive_more::{Add, AddAssign};
 pub struct Milliseconds(pub u128);
 
 #[derive(Copy, Clone)]
-pub struct SnakeSegment(pub Vec2);
+pub struct SnakePoint(pub Vec2);
 
-impl SnakeSegment {
+impl SnakePoint {
     pub fn new(x: f32, y: f32) -> Self {
         Self(Vec2::new(x, y))
     }
@@ -37,14 +37,14 @@ impl Pos {
     }
 }
 
-pub struct SnakeSegments(pub Vec<SnakeSegment>);
+pub struct Length(pub Vec<SnakePoint>);
 
-impl SnakeSegments {
+impl Length {
     pub fn new() -> Self {
         Self(Vec::new())
     }
 
-    pub fn push(&mut self, value: SnakeSegment) {
+    pub fn push(&mut self, value: SnakePoint) {
         self.0.push(value);
     }
 
@@ -52,7 +52,7 @@ impl SnakeSegments {
         self.0.remove(0); // TODO: Checking if exist? Use VecDeque?
     }
 
-    pub fn iter(&self) -> std::slice::Iter<SnakeSegment> {
+    pub fn iter(&self) -> std::slice::Iter<SnakePoint> {
         self.0.iter()
     }
 }

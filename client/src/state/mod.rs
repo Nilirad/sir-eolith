@@ -94,11 +94,11 @@ impl<'connection> State<'connection> {
         None
     }
 
-    fn get_snake_components(&mut self, id: Id) -> Option<(RefMut<Pos>, RefMut<SnakeSegments>)> {
-        let query = <(Read<Id>, Write<Pos>, Write<SnakeSegments>)>::query();
-        for (snake_id, pos, segments) in query.iter_mut(&mut self.world) {
+    fn get_snake_components(&mut self, id: Id) -> Option<(RefMut<Pos>, RefMut<Length>)> {
+        let query = <(Read<Id>, Write<Pos>, Write<Length>)>::query();
+        for (snake_id, pos, length) in query.iter_mut(&mut self.world) {
             if *snake_id == id {
-                return Some((pos, segments));
+                return Some((pos, length));
             }
         }
         None
