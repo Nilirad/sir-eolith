@@ -131,7 +131,7 @@ impl<'connection> State<'connection> {
             let mut last = None;
             let mut w = 0.0;
             let mut n = 0usize;
-            for point in length.0.iter_mut().rev().skip(2) {
+            for point in length.points.iter_mut().rev().skip(2) {
                 last = match last {
                     None => Some(point.0),
                     Some(last_point) => {

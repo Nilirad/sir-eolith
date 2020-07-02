@@ -1,5 +1,6 @@
 use num_enum::TryFromPrimitive;
 use std::convert::TryFrom;
+use crate::types::Fullness;
 
 /// Server message opcode. Tells the client what type of operation it should perform.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -136,6 +137,10 @@ impl ServerMsg {
         self.i += 3;
         debug_assert!(self.i <= self.data.len());
         result
+    }
+
+    pub fn read_fullness(&mut self) -> Fullness {
+        self.read_u24() as f32 / 16777215.0
     }
 }
 

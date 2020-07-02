@@ -48,7 +48,7 @@ impl<'connection> State<'connection> {
                 let g = g as f32 / std::u16::MAX as f32;
                 ggez::graphics::Color::new(r, g, 1.0, 1.0)
             };
-            let width = 29.0 * (1.0 + (length.0.len() - 2) as f32 / 106.0).min(6.0);
+            let width = 29.0 * (1.0 + (length.points.len() - 2) as f32 / 106.0).min(6.0);
             for point in length.iter() {
                 let screen_x = point.0.x;
                 let screen_y = point.0.y;

@@ -37,22 +37,30 @@ impl Pos {
     }
 }
 
-pub struct Length(pub Vec<SnakePoint>);
+pub type Fullness = f32;
+
+pub struct Length {
+    pub points: Vec<SnakePoint>,
+    pub fullness: Fullness,
+}
 
 impl Length {
     pub fn new() -> Self {
-        Self(Vec::new())
+        Self {
+            points: Vec::new(),
+            fullness: 0.0, // maybe add a parameter?
+        }
     }
 
     pub fn push(&mut self, value: SnakePoint) {
-        self.0.push(value);
+        self.points.push(value);
     }
 
     pub fn remove_tail(&mut self) {
-        self.0.remove(0); // TODO: Checking if exist? Use VecDeque?
+        self.points.remove(0); // TODO: Checking if exist? Use VecDeque?
     }
 
     pub fn iter(&self) -> std::slice::Iter<SnakePoint> {
-        self.0.iter()
+        self.points.iter()
     }
 }
