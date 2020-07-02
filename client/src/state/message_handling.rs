@@ -152,6 +152,9 @@ impl<'connection> State<'connection> {
     pub fn handle_shrink(&mut self, mut message: ServerMsg) {
         let id = Id(message.read_u16());
         if let Some((_pos, mut length)) = self.get_snake_components(id) {
+            if message.len() >= 7 {
+                length.fullness = message.read_fullness();
+            }
             length.remove_tail();
         } else {
             warn!("[shrink] Snake {} not found.", id.0);
