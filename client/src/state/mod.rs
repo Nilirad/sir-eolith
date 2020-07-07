@@ -49,6 +49,7 @@ impl<'connection> State<'connection> {
                 Op::LoginInfo => self.handle_login_info(message),
                 Op::SetupGame => self.handle_setup_game(message),
                 Op::GameOver => self.handle_game_over(),
+                Op::UpdateFullness => self.handle_update_fullness(message),
                 Op::SnakeAction => self.handle_snake_action(message),
                 Op::PingResponse => self.handle_ping_response(),
                 Op::PosAbs | Op::GrowAbs | Op::PosRel | Op::GrowRel

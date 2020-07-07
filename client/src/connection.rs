@@ -13,6 +13,8 @@ pub enum Op {
     SetupGame = 'a' as u8,
     /// Player died and connection will soon be closed.
     GameOver = 'v' as u8,
+    /// A snake must update its fullness value.
+    UpdateFullness = 'h' as u8,
     /// A new snake must be loaded or an existing snake must be removed.
     SnakeAction = 's' as u8,
     /// Response to client ping

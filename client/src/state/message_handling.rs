@@ -24,6 +24,13 @@ impl<'connection> State<'connection> {
         self.connection.close(); // TODO: Wait some time before closing.
     }
 
+    pub fn handle_update_fullness(&mut self, mut message: ServerMsg) {
+        let id = Id(message.read_u16());
+        if let Some((_, mut length)) = self.get_snake_components(id) {
+            length.fullness = message.read_fullness();
+        }
+    }
+
     pub fn handle_snake_action(&mut self, mut message: ServerMsg) {
         enum Action { Load, Unload }
         let id = Id(message.read_u16());
