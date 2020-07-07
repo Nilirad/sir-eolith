@@ -137,14 +137,14 @@ impl<'connection> State<'connection> {
             let mut n = 0usize;
             for point in length.points.iter_mut().rev().skip(2) {
                 last = match last {
-                    None => Some(point.0),
+                    None => Some(point),
                     Some(last_point) => {
                         n += 1;
                         if n <= 4 {
                             w = 0.43 * n as f32 / 4.0;
                         }
-                        point.0 += (last_point - point.0) * w;
-                        Some(point.0)
+                        *point += (*last_point - *point) * w;
+                        Some(point)
                     }
                 }
             }

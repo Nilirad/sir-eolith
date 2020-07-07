@@ -50,8 +50,8 @@ impl<'connection> State<'connection> {
             };
             let width = 29.0 * (1.0 + (length.points.len() - 2) as f32 / 106.0).min(6.0);
             for point in length.iter() {
-                let screen_x = point.0.x;
-                let screen_y = point.0.y;
+                let screen_x = point.x;
+                let screen_y = point.y;
                 mesh_builder = mesh_builder.circle(
                     graphics::DrawMode::fill(),
                     na::Point2::new(screen_x, screen_y),

@@ -4,14 +4,7 @@ use derive_more::{Add, AddAssign};
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq, Add, AddAssign)]
 pub struct Milliseconds(pub u128);
 
-#[derive(Copy, Clone)]
-pub struct SnakePoint(pub Vec2);
-
-impl SnakePoint {
-    pub fn new(x: f32, y: f32) -> Self {
-        Self(Vec2::new(x, y))
-    }
-}
+pub type SnakePoint = Vec2;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum PlayerType {
