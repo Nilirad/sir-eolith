@@ -17,7 +17,7 @@ impl<'connection> State<'connection> {
 
         self.draw_border(&mut mesh_builder);
         self.draw_food(&mut mesh_builder);
-        self.draw_snakes(&mut mesh_builder);
+        self.draw_snakes(&mut mesh_builder)?;
 
         let mesh = mesh_builder.build(ctx)?;
         graphics::draw(ctx, &mesh, (na::Point2::new(0.0, 0.0),))?;
@@ -37,9 +37,9 @@ impl<'connection> State<'connection> {
     }
 
     /// Draws the snakes.
-    fn draw_snakes(&mut self, mut mesh_builder: &mut MeshBuilder) {
-        let query = <(Read<Id>, Read<Pos>, Read<SnakeSegments>)>::query();
-        for (id, pos, segments) in query.iter(&mut self.world) {
+    fn draw_snakes(&mut self, mut mesh_builder: &mut MeshBuilder) -> GameResult {
+        let query = <(Read<Id>, Read<Pos>, Read<Body>)>::query();
+        for (id, pos, body) in query.iter(&mut self.world) {
             // TODO: Wrap in function `color_from_id()`
             let color = {
                 let r = id.0 & 0xFF00;
@@ -48,18 +48,18 @@ impl<'connection> State<'connection> {
                 let g = g as f32 / std::u16::MAX as f32;
                 ggez::graphics::Color::new(r, g, 1.0, 1.0)
             };
-            let width = 29.0 * (1.0 + (segments.0.len() - 2) as f32 / 106.0).min(6.0);
-            for segment in segments.iter() {
-                let screen_x = segment.0.x;
-                let screen_y = segment.0.y;
-                mesh_builder = mesh_builder.circle(
-                    graphics::DrawMode::fill(),
-                    na::Point2::new(screen_x, screen_y),
-                    width,
-                    2.0,
-                    color,
-                );
-            }
+            let width = 29.0 * (1.0 + (body.points.len() - 2) as f32 / 106.0).min(6.0);
+
+            let points = body.points.iter()
+                .map(|v| ggez::mint::Point2 {x: v.x, y: v.y})
+                .collect::<Vec<ggez::mint::Point2<f32>>>();
+
+            mesh_builder = mesh_builder.line(
+                points.as_slice(),
+                width,
+                color,
+            )?;
+
             mesh_builder = mesh_builder.circle(
                 graphics::DrawMode::fill(),
                 na::Point::from(pos.0),
@@ -68,6 +68,8 @@ impl<'connection> State<'connection> {
                 Color::new(0.0, 0.5, 0.0, 1.0),
             );
         }
+
+        Ok(())
     }
 
     fn draw_food(&mut self, mut mesh_builder: &mut MeshBuilder) {

@@ -24,6 +24,13 @@ impl<'connection> State<'connection> {
         self.connection.close(); // TODO: Wait some time before closing.
     }
 
+    pub fn handle_update_fullness(&mut self, mut message: ServerMsg) {
+        let id = Id(message.read_u16());
+        if let Some((_, mut body)) = self.get_snake_components(id) {
+            body.fullness = message.read_fullness();
+        }
+    }
+
     pub fn handle_snake_action(&mut self, mut message: ServerMsg) {
         enum Action { Load, Unload }
         let id = Id(message.read_u16());
@@ -31,6 +38,8 @@ impl<'connection> State<'connection> {
         let action = if message.len() > 9 { Action::Load } else { Action::Unload };
         match action {
             Action::Load => {
+                message.go_to(14);
+                let fullness = message.read_fullness();
                 message.go_to(18);
                 let pos = Pos::new(
                     message.read_u24() as f32 / 5.0,
@@ -58,7 +67,8 @@ impl<'connection> State<'connection> {
                 // TODO: Rewrite in an idiomatic way
                 let mut section_x = 0.0;
                 let mut section_y = 0.0;
-                let mut segments = SnakeSegments::new();
+                let mut body = Body::new();
+                body.fullness = fullness;
                 let mut first = true;
                 while !message.has_reached_end() {
                     if first {
@@ -69,7 +79,7 @@ impl<'connection> State<'connection> {
                         section_x += (message.read_u8() as i32 - 127) as f32 / 2.0;
                         section_y += (message.read_u8() as i32 - 127) as f32 / 2.0;
                     }
-                    segments.push(SnakeSegment::new(section_x, section_y));
+                    body.add_point(SnakePoint::new(section_x, section_y));
                 }
 
                 let tag = if self.player_set {
@@ -85,7 +95,7 @@ impl<'connection> State<'connection> {
                         (
                             id,
                             pos,
-                            segments,
+                            body,
                         )
                     )]
                 );
@@ -112,7 +122,7 @@ impl<'connection> State<'connection> {
         let absolute = message.opcode() == Ok(Op::PosAbs) || message.opcode() == Ok(Op::GrowAbs);
         let id = Id(message.read_u16());
 
-        if let Some((mut pos, mut segments)) = self.get_snake_components(id) {
+        if let Some((mut pos, mut body)) = self.get_snake_components(id) {
             if absolute {
                 pos.0.x = message.read_u16() as f32; // TODO: Abstract away to remove 0's.
                 pos.0.y = message.read_u16() as f32;
@@ -120,10 +130,11 @@ impl<'connection> State<'connection> {
                 pos.0.x += message.read_u8() as f32 - 128.0;
                 pos.0.y += message.read_u8() as f32 - 128.0;
             }
-            segments.push(SnakeSegment::new(pos.0.x, pos.0.y));
+            body.add_point(SnakePoint::new(pos.0.x, pos.0.y));
 
-            if !growing {
-                segments.remove_tail();
+            match growing {
+                true => body.fullness = message.read_fullness(),
+                false => body.shrink(),
             }
 
             // TODO: Horrible, non-idiomatic code, directly translated from the horrible
@@ -131,16 +142,16 @@ impl<'connection> State<'connection> {
             let mut last = None;
             let mut w = 0.0;
             let mut n = 0usize;
-            for segment in segments.0.iter_mut().rev().skip(2) {
+            for point in body.points.iter_mut().rev().skip(2) {
                 last = match last {
-                    None => Some(segment.0),
-                    Some(last_segment) => {
+                    None => Some(point),
+                    Some(last_point) => {
                         n += 1;
                         if n <= 4 {
                             w = 0.43 * n as f32 / 4.0;
                         }
-                        segment.0 += (last_segment - segment.0) * w;
-                        Some(segment.0)
+                        *point += (*last_point - *point) * w;
+                        Some(point)
                     }
                 }
             }
@@ -151,8 +162,11 @@ impl<'connection> State<'connection> {
 
     pub fn handle_shrink(&mut self, mut message: ServerMsg) {
         let id = Id(message.read_u16());
-        if let Some((_pos, mut segments)) = self.get_snake_components(id) {
-            segments.remove_tail();
+        if let Some((_pos, mut body)) = self.get_snake_components(id) {
+            if message.len() >= 7 {
+                body.fullness = message.read_fullness();
+            }
+            body.shrink();
         } else {
             warn!("[shrink] Snake {} not found.", id.0);
         }

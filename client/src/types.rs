@@ -4,14 +4,7 @@ use derive_more::{Add, AddAssign};
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq, Add, AddAssign)]
 pub struct Milliseconds(pub u128);
 
-#[derive(Copy, Clone)]
-pub struct SnakeSegment(pub Vec2);
-
-impl SnakeSegment {
-    pub fn new(x: f32, y: f32) -> Self {
-        Self(Vec2::new(x, y))
-    }
-}
+pub type SnakePoint = Vec2;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum PlayerType {
@@ -37,22 +30,26 @@ impl Pos {
     }
 }
 
-pub struct SnakeSegments(pub Vec<SnakeSegment>);
+pub type Fullness = f32;
 
-impl SnakeSegments {
+pub struct Body {
+    pub points: Vec<SnakePoint>,
+    pub fullness: Fullness,
+}
+
+impl Body {
     pub fn new() -> Self {
-        Self(Vec::new())
+        Self {
+            points: Vec::new(),
+            fullness: 0.0, // maybe add a parameter?
+        }
     }
 
-    pub fn push(&mut self, value: SnakeSegment) {
-        self.0.push(value);
+    pub fn add_point(&mut self, value: SnakePoint) {
+        self.points.push(value);
     }
 
-    pub fn remove_tail(&mut self) {
-        self.0.remove(0); // TODO: Checking if exist? Use VecDeque?
-    }
-
-    pub fn iter(&self) -> std::slice::Iter<SnakeSegment> {
-        self.0.iter()
+    pub fn shrink(&mut self) {
+        self.points.remove(0); // TODO: Checking if exist? Use VecDeque?
     }
 }
