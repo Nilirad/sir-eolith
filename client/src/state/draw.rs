@@ -38,8 +38,8 @@ impl<'connection> State<'connection> {
 
     /// Draws the snakes.
     fn draw_snakes(&mut self, mut mesh_builder: &mut MeshBuilder) {
-        let query = <(Read<Id>, Read<Pos>, Read<Length>)>::query();
-        for (id, pos, length) in query.iter(&mut self.world) {
+        let query = <(Read<Id>, Read<Pos>, Read<Body>)>::query();
+        for (id, pos, body) in query.iter(&mut self.world) {
             // TODO: Wrap in function `color_from_id()`
             let color = {
                 let r = id.0 & 0xFF00;
@@ -48,8 +48,8 @@ impl<'connection> State<'connection> {
                 let g = g as f32 / std::u16::MAX as f32;
                 ggez::graphics::Color::new(r, g, 1.0, 1.0)
             };
-            let width = 29.0 * (1.0 + (length.points.len() - 2) as f32 / 106.0).min(6.0);
-            for point in length.iter() {
+            let width = 29.0 * (1.0 + (body.points.len() - 2) as f32 / 106.0).min(6.0);
+            for point in body.points.iter() {
                 let screen_x = point.x;
                 let screen_y = point.y;
                 mesh_builder = mesh_builder.circle(
