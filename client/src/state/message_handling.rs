@@ -31,6 +31,8 @@ impl<'connection> State<'connection> {
         let action = if message.len() > 9 { Action::Load } else { Action::Unload };
         match action {
             Action::Load => {
+                message.go_to(14);
+                let fullness = message.read_fullness();
                 message.go_to(18);
                 let pos = Pos::new(
                     message.read_u24() as f32 / 5.0,
@@ -59,6 +61,7 @@ impl<'connection> State<'connection> {
                 let mut section_x = 0.0;
                 let mut section_y = 0.0;
                 let mut length = Length::new();
+                length.fullness = fullness;
                 let mut first = true;
                 while !message.has_reached_end() {
                     if first {
@@ -122,8 +125,9 @@ impl<'connection> State<'connection> {
             }
             length.push(SnakePoint::new(pos.0.x, pos.0.y));
 
-            if !growing {
-                length.remove_tail();
+            match growing {
+                true => length.fullness = message.read_fullness(),
+                false => length.remove_tail(),
             }
 
             // TODO: Horrible, non-idiomatic code, directly translated from the horrible
