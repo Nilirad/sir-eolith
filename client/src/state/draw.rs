@@ -63,8 +63,8 @@ impl<'connection> State<'connection> {
             mesh_builder = mesh_builder.circle(
                 graphics::DrawMode::fill(),
                 na::Point::from(pos.0),
-                width / 1.5,
-                2.0,
+                width / 2.0,
+                0.1,
                 Color::new(0.0, 0.5, 0.0, 1.0),
             );
         }
