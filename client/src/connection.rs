@@ -43,8 +43,6 @@ pub enum Op {
 
 pub type ClientMsg = Vec<u8>;
 
-// TODO: Make higher level reads, like `read_pos`, or `read_id`.
-
 /// A server message sent to the client. Contains additional data to help parsing data.
 pub struct ServerMsg {
     /// The message raw data, in bytes.

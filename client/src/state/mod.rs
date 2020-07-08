@@ -121,8 +121,8 @@ impl<'connection> State<'connection> {
             .filter(tag::<FoodTag>());
         let mut result = Vec::new();
         for (food, (food_pos,)) in query.iter_entities(&self.world) {
-            let sector_x = (food_pos.0.x / self.sector_size).floor() as u8;
-            let sector_y = (food_pos.0.y / self.sector_size).floor() as u8;
+            let sector_x = (food_pos.x / self.sector_size).floor() as u8;
+            let sector_y = (food_pos.y / self.sector_size).floor() as u8;
 
             if sector_x == world_sector.x && sector_y == world_sector.y {
                 result.push(food);

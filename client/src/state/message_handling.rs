@@ -125,7 +125,7 @@ impl<'connection> State<'connection> {
             } else {
                 *pos += message.read_pos_delta();
             }
-            body.add_point(SnakePoint::new(pos.0.x, pos.0.y));
+            body.add_point(SnakePoint::new(pos.x, pos.y));
 
             match growing {
                 true => body.fullness = message.read_fullness(),
@@ -210,7 +210,7 @@ impl<'connection> State<'connection> {
         if let Some(food) = self.find_food(pos) {
             self.world.delete(food);
         } else {
-            warn!("Food ({}, {}) not found.", pos.0.x, pos.0.y);
+            warn!("Food ({}, {}) not found.", pos.x, pos.y);
         }
         
     }
