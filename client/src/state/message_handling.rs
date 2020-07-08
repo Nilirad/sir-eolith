@@ -191,9 +191,9 @@ impl<'connection> State<'connection> {
                 message.read_u16() as f32,
                 message.read_u16() as f32,
             );
-            let _size = message.read_u8() as f32 / 5.0;
+            let size = message.read_size();
             
-            foods.push((pos,));
+            foods.push((pos, size));
         }
 
         self.world.insert((FoodTag,), foods);
@@ -206,9 +206,9 @@ impl<'connection> State<'connection> {
                 message.read_u16() as f32,
                 message.read_u16() as f32,
             );
-            let _size = message.read_u8() as f32 / 5.0;
+            let size = message.read_size();
 
-            self.world.insert((FoodTag,), vec![(pos,)]);
+            self.world.insert((FoodTag,), vec![(pos, size)]);
 
         } else {
             warn!("Does this even happen?");

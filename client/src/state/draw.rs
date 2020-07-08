@@ -75,14 +75,14 @@ impl<'connection> State<'connection> {
     fn draw_food(&mut self, mut mesh_builder: &mut MeshBuilder) {
         const FOOD_COLOR: Color = Color{ r: 1.0, g: 1.0, b: 0.0, a: 1.0 };
 
-        let query = <(Read<Pos>,)>::query()
+        let query = <(Read<Pos>, Read<Size>)>::query()
             .filter(tag::<FoodTag>());
-        for (pos,) in query.iter(&mut self.world) {
+        for (pos, size) in query.iter(&mut self.world) {
             mesh_builder = mesh_builder.circle(
                 graphics::DrawMode::fill(),
                 na::Point2::new(pos.0.x, pos.0.y),
-                10.0,
-                2.0,
+                *size,
+                0.1,
                 FOOD_COLOR,
             );
         }

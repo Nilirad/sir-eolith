@@ -30,6 +30,8 @@ impl Pos {
     }
 }
 
+pub type Size = f32;
+
 pub type Fullness = f32;
 
 pub struct Body {
