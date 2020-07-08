@@ -21,14 +21,7 @@ pub struct FoodTag;
 #[derive(Copy, Clone, PartialEq)]
 pub struct Id(pub u16);
 
-#[derive(Copy, Clone, PartialEq, AddAssign)]
-pub struct Pos(pub Vec2);
-
-impl Pos {
-    pub fn new(x: f32, y: f32) -> Self {
-        Self(Vec2::new(x, y))
-    }
-}
+pub type Pos = Vec2;
 
 pub type Size = f32;
 

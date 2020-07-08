@@ -62,7 +62,7 @@ impl<'connection> State<'connection> {
 
             mesh_builder = mesh_builder.circle(
                 graphics::DrawMode::fill(),
-                na::Point::from(pos.0),
+                na::Point::from(*pos),
                 width / 2.0,
                 0.1,
                 Color::new(0.0, 0.5, 0.0, 1.0),
@@ -80,7 +80,7 @@ impl<'connection> State<'connection> {
         for (pos, size) in query.iter(&mut self.world) {
             mesh_builder = mesh_builder.circle(
                 graphics::DrawMode::fill(),
-                na::Point2::new(pos.0.x, pos.0.y),
+                na::Point2::new(pos.x, pos.y),
                 *size,
                 0.1,
                 FOOD_COLOR,
@@ -95,8 +95,8 @@ impl<'connection> State<'connection> {
         
         for (pos,) in query.iter(&mut self.world) {
             let viewport = graphics::Rect {
-                x: pos.0.x - (FIELD_OF_VIEW * WINDOW_WIDTH / 2.0),
-                y: pos.0.y - (FIELD_OF_VIEW * WINDOW_HEIGHT / 2.0),
+                x: pos.x - (FIELD_OF_VIEW * WINDOW_WIDTH / 2.0),
+                y: pos.y - (FIELD_OF_VIEW * WINDOW_HEIGHT / 2.0),
                 w: FIELD_OF_VIEW * WINDOW_WIDTH,
                 h: FIELD_OF_VIEW * WINDOW_HEIGHT,
             };
