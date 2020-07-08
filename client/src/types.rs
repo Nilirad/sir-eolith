@@ -21,7 +21,7 @@ pub struct FoodTag;
 #[derive(Copy, Clone, PartialEq)]
 pub struct Id(pub u16);
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, AddAssign)]
 pub struct Pos(pub Vec2);
 
 impl Pos {
