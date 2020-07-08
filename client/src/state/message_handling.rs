@@ -41,7 +41,7 @@ impl<'connection> State<'connection> {
                 message.go_to(14);
                 let fullness = message.read_fullness();
                 message.go_to(18);
-                let pos = message.read_spawn_pos();
+                let pos = message.read_low_resolution_pos();
                 
                 let nickname_length = message.read_u8();
                 let _nickname = if nickname_length > 0 {
@@ -121,11 +121,9 @@ impl<'connection> State<'connection> {
 
         if let Some((mut pos, mut body)) = self.get_snake_components(id) {
             if absolute {
-                pos.0.x = message.read_u16() as f32; // TODO: Use structured message reading.
-                pos.0.y = message.read_u16() as f32;
+                *pos = message.read_pos();
             } else {
-                pos.0.x += message.read_u8() as f32 - 128.0;
-                pos.0.y += message.read_u8() as f32 - 128.0;
+                *pos += message.read_pos_delta();
             }
             body.add_point(SnakePoint::new(pos.0.x, pos.0.y));
 
@@ -184,7 +182,7 @@ impl<'connection> State<'connection> {
         let mut foods = Vec::new();
         while !message.has_reached_end() {
             let _unknown = message.read_u8();
-            let pos = message.read_food_pos();
+            let pos = message.read_pos();
             let size = message.read_size();
             
             foods.push((pos, size));
@@ -196,7 +194,7 @@ impl<'connection> State<'connection> {
     pub fn handle_load_single_food(&mut self, mut message: ServerMsg) {
         let _unknown = message.read_u8();
         if message.len() > 7 {
-            let pos = message.read_food_pos();
+            let pos = message.read_pos();
             let size = message.read_size();
 
             self.world.insert((FoodTag,), vec![(pos, size)]);
@@ -207,7 +205,7 @@ impl<'connection> State<'connection> {
     }
 
     pub fn handle_eat_food(&mut self, mut message: ServerMsg) {
-        let pos = message.read_food_pos();
+        let pos = message.read_pos();
         
         if let Some(food) = self.find_food(pos) {
             self.world.delete(food);
