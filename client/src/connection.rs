@@ -139,20 +139,24 @@ impl ServerMsg {
         result
     }
 
-    pub fn read_low_resolution_pos(&mut self) -> Pos {
+    /// Returns a `Pos` component, reading 6 bytes from the message.
+    pub fn read_pos_6_bytes(&mut self) -> Pos {
         Pos::new(
             self.read_u24() as f32 / 5.0,
             self.read_u24() as f32 / 5.0,
         )
     }
 
-    pub fn read_pos(&mut self) -> Pos {
+    /// Returns a `Pos` component, reading 4 bytes from the message.
+    pub fn read_pos_4_bytes(&mut self) -> Pos {
         Pos::new(
             self.read_u16() as f32,
             self.read_u16() as f32,
         )
     }
 
+    /// Returns a `Pos` component, meant to be used as a delta, reading 2 bytes from
+    /// the message.
     pub fn read_pos_delta(&mut self) -> Pos {
         Pos::new(
             self.read_u8() as f32 - 128.0,
@@ -160,10 +164,12 @@ impl ServerMsg {
         )
     }
 
+    /// Returns a `Fullness` type, reading 3 bytes from the message.
     pub fn read_fullness(&mut self) -> Fullness {
         self.read_u24() as f32 / 16777215.0
     }
 
+    /// Returns a `Size` type, reading 1 byte from the message.
     pub fn read_size(&mut self) -> Size {
         self.read_u8() as f32 / 5.0
     }
