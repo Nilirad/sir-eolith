@@ -164,6 +164,32 @@ impl ServerMsg {
         )
     }
 
+    pub fn read_pos_delta_half(&mut self) -> Pos {
+        Pos::new(
+            (self.read_u8() as i32 - 127) as f32 / 2.0,
+            (self.read_u8() as i32 - 127) as f32 / 2.0,
+        )
+    }
+
+    pub fn read_body(&mut self, fullness: Fullness) -> Body {
+        // TODO: Rewrite idiomatically
+        let mut section_pos = Pos::new(0.0, 0.0);
+        let mut body = Body::new();
+        body.fullness = fullness;
+        let mut first = true;
+        while !self.has_reached_end() {
+            if first {
+                first = false;
+                section_pos = self.read_pos_6_bytes();
+            } else {
+                section_pos += self.read_pos_delta_half();
+            }
+            body.add_point(section_pos);
+        }
+
+        body
+    }
+
     /// Returns a `Fullness` type, reading 3 bytes from the message.
     pub fn read_fullness(&mut self) -> Fullness {
         self.read_u24() as f32 / 16777215.0
