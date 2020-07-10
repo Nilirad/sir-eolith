@@ -16,8 +16,7 @@ pub struct PlayerTag(pub PlayerType);
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct FoodTag;
 
-#[derive(Copy, Clone, PartialEq)]
-pub struct Id(pub u16);
+pub type Id = u16;
 
 pub type Pos = Vec2;
 

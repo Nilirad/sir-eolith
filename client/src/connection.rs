@@ -139,6 +139,10 @@ impl ServerMsg {
         result
     }
 
+    pub fn read_id(&mut self) -> Id {
+        self.read_u16()
+    }
+
     /// Returns a `Pos` component, reading 6 bytes from the message.
     pub fn read_pos_6_bytes(&mut self) -> Pos {
         Pos::new(
