@@ -61,23 +61,7 @@ impl<'connection> State<'connection> {
                     None
                 };
 
-                // TODO: Rewrite in an idiomatic way
-                let mut section_x = 0.0;
-                let mut section_y = 0.0;
-                let mut body = Body::new();
-                body.fullness = fullness;
-                let mut first = true;
-                while !message.has_reached_end() {
-                    if first {
-                        first = false;
-                        section_x = message.read_u24() as f32 / 5.0;
-                        section_y = message.read_u24() as f32 / 5.0;
-                    } else {
-                        section_x += (message.read_u8() as i32 - 127) as f32 / 2.0;
-                        section_y += (message.read_u8() as i32 - 127) as f32 / 2.0;
-                    }
-                    body.add_point(SnakePoint::new(section_x, section_y));
-                }
+                let body = message.read_body(fullness);
 
                 let tag = if self.player_set {
                     PlayerTag(PlayerType::Other)

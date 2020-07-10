@@ -4,8 +4,6 @@ use derive_more::{Add, AddAssign};
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq, Add, AddAssign)]
 pub struct Milliseconds(pub u128);
 
-pub type SnakePoint = Vec2;
-
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum PlayerType {
     You,
@@ -22,6 +20,8 @@ pub struct FoodTag;
 pub struct Id(pub u16);
 
 pub type Pos = Vec2;
+
+pub type SnakePoint = Pos;
 
 pub type Size = f32;
 
