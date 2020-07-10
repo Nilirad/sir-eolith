@@ -42,8 +42,8 @@ impl<'connection> State<'connection> {
         for (id, pos, body) in query.iter(&mut self.world) {
             // TODO: Wrap in function `color_from_id()`
             let color = {
-                let r = id.0 & 0xFF00;
-                let g = id.0 & 0x00FF;
+                let r = *id & 0xFF00;
+                let g = *id & 0x00FF;
                 let r = r as f32 / std::u16::MAX as f32;
                 let g = g as f32 / std::u16::MAX as f32;
                 ggez::graphics::Color::new(r, g, 1.0, 1.0)

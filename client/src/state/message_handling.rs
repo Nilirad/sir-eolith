@@ -25,7 +25,7 @@ impl<'connection> State<'connection> {
     }
 
     pub fn handle_update_fullness(&mut self, mut message: ServerMsg) {
-        let id = Id(message.read_u16());
+        let id = message.read_id();
         if let Some((_, mut body)) = self.get_snake_components(id) {
             body.fullness = message.read_fullness();
         }
@@ -33,7 +33,7 @@ impl<'connection> State<'connection> {
 
     pub fn handle_snake_action(&mut self, mut message: ServerMsg) {
         enum Action { Load, Unload }
-        let id = Id(message.read_u16());
+        let id = message.read_id();
 
         let action = if message.len() > 9 { Action::Load } else { Action::Unload };
         match action {
@@ -80,14 +80,14 @@ impl<'connection> State<'connection> {
                         )
                     )]
                 );
-                trace!("Loaded snake {}", id.0);
+                trace!("Loaded snake {}", id);
             }
             Action::Unload => {
                 if let Some(snake) = self.find_snake_with_id(id) {
                     self.world.delete(snake);
-                    trace!("Unloaded snake {}", id.0);
+                    trace!("Unloaded snake {}", id);
                 } else {
-                    warn!("[snake unload action] Snake {} not found.", id.0);
+                    warn!("[snake unload action] Snake {} not found.", id);
                 }
             }
         }
@@ -101,7 +101,7 @@ impl<'connection> State<'connection> {
     pub fn handle_positioning_and_growth(&mut self, mut message: ServerMsg) {
         let growing = message.opcode() == Ok(Op::GrowAbs) || message.opcode() == Ok(Op::GrowRel);
         let absolute = message.opcode() == Ok(Op::PosAbs) || message.opcode() == Ok(Op::GrowAbs);
-        let id = Id(message.read_u16());
+        let id = message.read_id();
 
         if let Some((mut pos, mut body)) = self.get_snake_components(id) {
             if absolute {
@@ -135,19 +135,19 @@ impl<'connection> State<'connection> {
                 }
             }
         } else {
-            warn!("[pos/grow] Snake {} not found.", id.0);
+            warn!("[pos/grow] Snake {} not found.", id);
         }
     }
 
     pub fn handle_shrink(&mut self, mut message: ServerMsg) {
-        let id = Id(message.read_u16());
+        let id = message.read_id();
         if let Some((_pos, mut body)) = self.get_snake_components(id) {
             if message.len() >= 7 {
                 body.fullness = message.read_fullness();
             }
             body.shrink();
         } else {
-            warn!("[shrink] Snake {} not found.", id.0);
+            warn!("[shrink] Snake {} not found.", id);
         }
     }
 
