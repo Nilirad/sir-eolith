@@ -48,7 +48,7 @@ impl<'connection> State<'connection> {
                 let g = g as f32 / std::u16::MAX as f32;
                 ggez::graphics::Color::new(r, g, 1.0, 1.0)
             };
-            let width = 29.0 * (1.0 + (body.points.len() - 2) as f32 / 106.0).min(6.0);
+            let width = 29.0 * body.sc();
 
             let points = body.points.iter()
                 .map(|v| ggez::mint::Point2 {x: v.x, y: v.y})

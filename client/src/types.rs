@@ -46,4 +46,8 @@ impl Body {
     pub fn shrink(&mut self) {
         self.points.remove(0); // TODO: Checking if exist? Use VecDeque?
     }
+
+    pub fn sc(&self) -> f32 {
+        6f32.min(1.0 + (self.points.len() as f32 - 2.0) / 106.0)
+    }
 }
