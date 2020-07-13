@@ -12,9 +12,15 @@ impl<'connection> State<'connection> {
     }
 
     pub fn handle_setup_game(&mut self, mut message: ServerMsg) {
-        self.grd = message.read_u24() as f32;
+        self.params.world_radius = message.read_u24() as f32;
         let _mscps = message.read_u16();
-        self.sector_size = message.read_u16() as f32;
+        self.params.sector_size = message.read_u16() as f32;
+        message.skip(2); // `sector_count_along_edge` is unused.
+        self.params.spangdv = message.read_u8() as f32;
+        message.go_to(19);
+        self.params.mamu = message.read_u16() as f32;
+        message.go_to(23);
+        self.params.cst = message.read_u16() as f32;
         
         info!("Logged into server.");
         self.connection.set_state(ConnectionState::Playing);

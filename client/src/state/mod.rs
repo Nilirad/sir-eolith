@@ -43,8 +43,7 @@ pub struct State<'connection> {
     ping_status: PingStatus,
     last_update: Instant,
     player_set: bool,
-    grd: f32,
-    sector_size: f32,
+    params: Params,
 }
 
 impl<'connection> State<'connection> {
@@ -58,8 +57,7 @@ impl<'connection> State<'connection> {
             ping_status: PingStatus::GotResponse(Milliseconds(0)),
             last_update: Instant::now(),
             player_set: false,
-            grd: 16384.0, // TODO: magic number.
-            sector_size: 480.0, // TODO: magic number.
+            params: Params::default(),
         }
     }
 
@@ -141,8 +139,8 @@ impl<'connection> State<'connection> {
             .filter(tag::<FoodTag>());
         let mut result = Vec::new();
         for (food, (food_pos,)) in query.iter_entities(&self.world) {
-            let sector_x = (food_pos.x / self.sector_size).floor() as u8;
-            let sector_y = (food_pos.y / self.sector_size).floor() as u8;
+            let sector_x = (food_pos.x / self.params.sector_size).floor() as u8;
+            let sector_y = (food_pos.y / self.params.sector_size).floor() as u8;
 
             if sector_x == world_sector.x && sector_y == world_sector.y {
                 result.push(food);
