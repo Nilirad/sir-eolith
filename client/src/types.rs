@@ -50,4 +50,8 @@ impl Body {
     pub fn sc(&self) -> f32 {
         6f32.min(1.0 + (self.points.len() as f32 - 2.0) / 106.0)
     }
+
+    pub fn scang(&self) -> f32 {
+        0.13 + 0.87 * ((7.0 - self.sc()) / 6.0).powf(2.0)
+    }
 }
