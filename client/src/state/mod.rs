@@ -16,6 +16,26 @@ enum PingStatus {
     GotResponse(Milliseconds),
 }
 
+struct Params {
+    world_radius: f32,
+    sector_size: f32,
+    spangdv: f32,
+    mamu: f32,
+    cst: f32,
+}
+
+impl Default for Params {
+    fn default() -> Self {
+        Self {
+            world_radius: 16384.0,
+            sector_size: 480.0,
+            spangdv: 4.8,
+            mamu: 0.033,
+            cst: 0.43,
+        }
+    }
+}
+
 pub struct State<'connection> {
     connection: &'connection mut dyn Connection,
     world: World,
