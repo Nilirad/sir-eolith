@@ -9,11 +9,31 @@ use crate::controller::SnakeController;
 use std::time::Instant;
 use legion::prelude::*;
 use legion::borrow::RefMut;
+struct Ping {
+    waiting_response: bool,
+    since: Instant,
+}
 
-#[derive(Debug, Copy, Clone)]
-enum PingStatus {
-    WaitingResponse,
-    GotResponse(Milliseconds),
+impl Ping {
+    fn new(waiting_response: bool) -> Self {
+        Self {
+            waiting_response,
+            since: Instant::now(),
+        }
+    }
+
+    fn switch(&mut self) {
+        self.waiting_response = !self.waiting_response;
+        self.since = Instant::now();
+    }
+
+    fn lagging(&self) -> bool {
+        self.waiting_response && (Instant::now() - self.since).as_millis() > 420
+    }
+
+    fn can_send_ping(&self) -> bool {
+        !self.waiting_response && (Instant::now() - self.since).as_millis() > 250
+    }
 }
 
 struct Params {
@@ -40,21 +60,19 @@ pub struct State<'connection> {
     connection: &'connection mut dyn Connection,
     world: World,
     controller: SnakeController,
-    ping_status: PingStatus,
+    ping_status: Ping,
     last_update: Instant,
     player_set: bool,
     params: Params,
 }
 
 impl<'connection> State<'connection> {
-    const PING_TRESHOLD: Milliseconds = Milliseconds(250);
-
     pub fn new(connection: &'connection mut dyn Connection) -> Self {
         Self {
             connection,
             world: World::new(),
             controller: SnakeController::new(),
-            ping_status: PingStatus::GotResponse(Milliseconds(0)),
+            ping_status: Ping::new(false),
             last_update: Instant::now(),
             player_set: false,
             params: Params::default(),
@@ -89,17 +107,12 @@ impl<'connection> State<'connection> {
         Milliseconds(delta)
     }
 
-    fn server_ping(&mut self, delta: Milliseconds) {
+    fn server_ping(&mut self) {
         const PING_MESSAGE: [u8; 1] = [0xFB];
 
-        if let PingStatus::GotResponse(since_last_pong) = self.ping_status {
-            let elapsed = since_last_pong + delta;
-            if elapsed >= Self::PING_TRESHOLD {
-                self.connection.send(PING_MESSAGE.to_vec());
-                self.ping_status = PingStatus::WaitingResponse;
-            } else {
-                self.ping_status = PingStatus::GotResponse(elapsed);
-            }
+        if self.ping_status.can_send_ping() {
+            self.connection.send(PING_MESSAGE.to_vec());
+            self.ping_status.switch();
         }
     }
 
@@ -159,7 +172,7 @@ impl<'connection> EventHandler for State<'connection> {
             self.handle_server_message(message);
         }
 
-        self.server_ping(delta);
+        self.server_ping();
 
         if self.connection.state() == ConnectionState::Playing {
             self.controller.move_snake(delta, self.connection);
