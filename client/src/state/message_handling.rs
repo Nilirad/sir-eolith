@@ -1,4 +1,4 @@
-use super::{State, PingStatus};
+use super::State;
 use crate::connection::{ClientMsg, ServerMsg, Op, ConnectionState};
 use crate::types::*;
 use crate::nalgebra_prelude::*;
@@ -100,7 +100,7 @@ impl<'connection> State<'connection> {
     }
 
     pub fn handle_ping_response(&mut self) {
-        self.ping_status = PingStatus::GotResponse(Milliseconds(0));
+        self.ping_status.switch();
         trace!("Pong");
     }
 
