@@ -36,3 +36,12 @@ mod consts {
 }
 
 pub use state::State;
+
+fn modulo(n: f32, modulus: f32) -> f32 {
+    let result = n % modulus;
+    if result < 0.0 {
+        result + modulus
+    } else {
+        result
+    }
+}
