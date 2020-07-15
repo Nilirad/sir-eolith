@@ -1,4 +1,5 @@
 use crate::nalgebra_prelude::*;
+use crate::modulo;
 use derive_more::{Add, AddAssign};
 
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq, Add, AddAssign)]
@@ -53,5 +54,54 @@ impl Body {
 
     pub fn scang(&self) -> f32 {
         0.13 + 0.87 * ((7.0 - self.sc()) / 6.0).powf(2.0)
+    }
+}
+
+pub struct Movement {
+    pub speed: f32,
+    pub angle: f32,
+    pub target_angle: f32,
+    pub direction: f32,
+}
+
+impl Movement {
+    const REV_ANGLE: f32 = 2.0 * std::f32::consts::PI;
+
+    pub fn new(speed: f32, angle: f32, direction: f32) -> Self {
+        Self {
+            speed,
+            angle,
+            target_angle: angle,
+            direction,
+        }
+    }
+
+    pub fn spang(&self, spangdv: f32) -> f32 {
+        (self.speed / spangdv).min(1.0)
+    }
+
+    pub fn update_angle(&mut self, mamu: f32, vfr: f32, scang: f32, spangdv: f32) {
+        let delta_angle = mamu * vfr * scang * self.spang(spangdv);
+        if self.direction != 0.0 {
+            self.angle = modulo(self.angle - delta_angle, Self::REV_ANGLE);
+            if self.ending_rotation() {
+                self.angle = self.target_angle;
+                self.direction = 0.0;
+            }
+        } else {
+            self.angle = self.target_angle;
+        }
+    }
+
+    fn ending_rotation(&self) -> bool {
+        let mut h = (self.target_angle - self.angle) % Self::REV_ANGLE;
+        if h < 0.0 {
+            h += Self::REV_ANGLE;
+            if h > std::f32::consts::PI {
+                h -= Self::REV_ANGLE;
+            }
+        }
+
+        h > 0.0
     }
 }

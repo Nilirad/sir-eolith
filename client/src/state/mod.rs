@@ -12,6 +12,7 @@ use legion::borrow::RefMut;
 struct Ping {
     waiting_response: bool,
     since: Instant,
+    lag_multiplier: f32,
 }
 
 impl Ping {
@@ -19,6 +20,7 @@ impl Ping {
         Self {
             waiting_response,
             since: Instant::now(),
+            lag_multiplier: 1.0,
         }
     }
 
@@ -33,6 +35,14 @@ impl Ping {
 
     fn can_send_ping(&self) -> bool {
         !self.waiting_response && (Instant::now() - self.since).as_millis() > 250
+    }
+
+    fn update_lag_multiplier(&mut self) {
+        self.lag_multiplier = if self.lagging() {
+            (self.lag_multiplier * 0.85).max(0.01)
+        } else {
+            (self.lag_multiplier + 0.05).min(1.0)
+        };
     }
 }
 
@@ -177,6 +187,9 @@ impl<'connection> EventHandler for State<'connection> {
         if self.connection.state() == ConnectionState::Playing {
             self.controller.move_snake(delta, self.connection);
         }
+
+        self.ping_status.update_lag_multiplier();
+        let vfr = (delta.0 as f32 / 8.0).max(1.56).min(5.0) * self.ping_status.lag_multiplier;
 
         Ok(())
     }
