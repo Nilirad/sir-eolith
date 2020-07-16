@@ -57,21 +57,38 @@ impl Body {
     }
 }
 
+#[derive(Eq, PartialEq)]
+pub enum Direction {
+    None,
+    Left,
+    Right,
+}
+
+impl Direction {
+    pub fn value(&self) -> f32 {
+        match self {
+            Self::None => 0.0,
+            Self::Left => -1.0,
+            Self::Right => 1.0,
+        }
+    }
+}
+
 pub struct Movement {
     pub speed: f32,
     pub angle: f32,
     pub target_angle: f32,
-    pub direction: f32,
+    pub direction: Direction,
 }
 
 impl Movement {
     const REV_ANGLE: f32 = 2.0 * std::f32::consts::PI;
 
-    pub fn new(speed: f32, angle: f32, direction: f32) -> Self {
+    pub fn new(speed: f32, angle: f32, target_angle: f32, direction: Direction) -> Self {
         Self {
             speed,
             angle,
-            target_angle: angle,
+            target_angle,
             direction,
         }
     }
@@ -82,11 +99,11 @@ impl Movement {
 
     pub fn update_angle(&mut self, mamu: f32, vfr: f32, scang: f32, spangdv: f32) {
         let delta_angle = mamu * vfr * scang * self.spang(spangdv);
-        if self.direction != 0.0 {
+        if self.direction != Direction::None {
             self.angle = modulo(self.angle - delta_angle, Self::REV_ANGLE);
             if self.ending_rotation() {
                 self.angle = self.target_angle;
-                self.direction = 0.0;
+                self.direction = Direction::None;
             }
         } else {
             self.angle = self.target_angle;

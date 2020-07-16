@@ -32,7 +32,7 @@ impl<'connection> State<'connection> {
 
     pub fn handle_update_fullness(&mut self, mut message: ServerMsg) {
         let id = message.read_id();
-        if let Some((_, mut body)) = self.get_snake_components(id) {
+        if let Some((_, mut body, _)) = self.get_snake_components(id) {
             body.fullness = message.read_fullness();
         }
     }
@@ -44,7 +44,10 @@ impl<'connection> State<'connection> {
         let action = if message.len() > 9 { Action::Load } else { Action::Unload };
         match action {
             Action::Load => {
-                message.go_to(14);
+                let angle = message.read_angle();
+                message.skip(1); // unused byte
+                let target_angle = message.read_angle();
+                let speed = message.read_speed();
                 let fullness = message.read_fullness();
                 message.go_to(18);
                 let pos = message.read_pos_6_bytes();
@@ -69,6 +72,8 @@ impl<'connection> State<'connection> {
 
                 let body = message.read_body(fullness);
 
+                let movement = Movement::new(speed, angle, target_angle, Direction::None);
+
                 let tag = if self.player_set {
                     PlayerTag(PlayerType::Other)
                 } else {
@@ -83,6 +88,7 @@ impl<'connection> State<'connection> {
                             id,
                             pos,
                             body,
+                            movement,
                         )
                     )]
                 );
@@ -109,7 +115,7 @@ impl<'connection> State<'connection> {
         let absolute = message.opcode() == Ok(Op::PosAbs) || message.opcode() == Ok(Op::GrowAbs);
         let id = message.read_id();
 
-        if let Some((mut pos, mut body)) = self.get_snake_components(id) {
+        if let Some((mut pos, mut body, _)) = self.get_snake_components(id) {
             if absolute {
                 *pos = message.read_pos_4_bytes();
             } else {
@@ -147,7 +153,7 @@ impl<'connection> State<'connection> {
 
     pub fn handle_shrink(&mut self, mut message: ServerMsg) {
         let id = message.read_id();
-        if let Some((_pos, mut body)) = self.get_snake_components(id) {
+        if let Some((_pos, mut body, _)) = self.get_snake_components(id) {
             if message.len() >= 7 {
                 body.fullness = message.read_fullness();
             }

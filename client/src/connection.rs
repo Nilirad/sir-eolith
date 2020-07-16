@@ -203,6 +203,14 @@ impl ServerMsg {
     pub fn read_size(&mut self) -> Size {
         self.read_u8() as f32 / 5.0
     }
+
+    pub fn read_angle(&mut self) -> f32 {
+        2.0 * self.read_u24() as f32 * std::f32::consts::PI / 16777215.0
+    }
+
+    pub fn read_speed(&mut self) -> f32 {
+        self.read_u16() as f32 / 1000.0
+    }
 }
 
 impl IntoIterator for ServerMsg {
