@@ -48,6 +48,10 @@ impl Body {
         self.points.remove(0); // TODO: Checking if exist? Use VecDeque?
     }
 
+    pub fn head_pos(&self) -> Pos {
+        self.points.last().copied().unwrap()
+    }
+
     pub fn sc(&self) -> f32 {
         6f32.min(1.0 + (self.points.len() as f32 - 2.0) / 106.0)
     }

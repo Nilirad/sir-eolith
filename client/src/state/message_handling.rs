@@ -115,13 +115,17 @@ impl<'connection> State<'connection> {
         let absolute = message.opcode() == Ok(Op::PosAbs) || message.opcode() == Ok(Op::GrowAbs);
         let id = message.read_id();
 
-        if let Some((mut pos, mut body, _)) = self.get_snake_components(id) {
-            if absolute {
-                *pos = message.read_pos_4_bytes();
+        let lag_multiplier = self.ping_status.lag_multiplier;
+        if let Some((mut pos, mut body, movement)) = self.get_snake_components(id) {
+            let new_pos = if absolute {
+                message.read_pos_4_bytes()
             } else {
-                *pos += message.read_pos_delta();
-            }
-            body.add_point(SnakePoint::new(pos.x, pos.y));
+                body.head_pos() + message.read_pos_delta()
+            };
+            body.add_point(new_pos);
+
+            pos.x = new_pos.x + movement.angle.cos() * lag_multiplier;
+            pos.y = new_pos.y + movement.angle.sin() * lag_multiplier;
 
             match growing {
                 true => body.fullness = message.read_fullness(),
