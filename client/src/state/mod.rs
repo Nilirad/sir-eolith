@@ -193,6 +193,13 @@ impl<'connection> EventHandler for State<'connection> {
         self.ping_status.update_lag_multiplier();
         let vfr = (delta.0 as f32 / 8.0).max(1.56).min(5.0) * self.ping_status.lag_multiplier;
 
+        let query = <(Write<Pos>, Read<Movement>)>::query();
+        for (mut pos, movement) in query.iter_mut(&mut self.world) {
+            let displacement = movement.speed * vfr / 4.0; // TODO: add .min(msl)
+            pos.x += movement.angle.cos() * displacement;
+            pos.y += movement.angle.sin() * displacement;
+        }
+
         Ok(())
     }
 
