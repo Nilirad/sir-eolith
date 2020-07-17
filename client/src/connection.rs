@@ -11,6 +11,13 @@ pub enum Op {
     LoginInfo = '6' as u8,
     /// Client must set some game parameters.
     SetupGame = 'a' as u8,
+    
+    Angle1 = 'e' as u8,
+    Angle2 = 'E' as u8,
+    Angle3 = '3' as u8,
+    Angle4 = '4' as u8,
+    Angle5 = '5' as u8,
+
     /// Player died and connection will soon be closed.
     GameOver = 'v' as u8,
     /// A snake must update its fullness value.
@@ -208,8 +215,16 @@ impl ServerMsg {
         2.0 * self.read_u24() as f32 * std::f32::consts::PI / 16777215.0
     }
 
+    pub fn read_angle_short(&mut self) -> f32 {
+        2.0 * self.read_u8() as f32 * std::f32::consts::PI / 256.0
+    }
+
     pub fn read_speed(&mut self) -> f32 {
         self.read_u16() as f32 / 1000.0
+    }
+
+    pub fn read_speed_short(&mut self) -> f32 {
+        self.read_u8() as f32 / 18.0
     }
 }
 
