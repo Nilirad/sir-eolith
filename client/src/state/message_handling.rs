@@ -95,8 +95,8 @@ impl<'connection> State<'connection> {
                     }
                     _ => unreachable!(),
                 } 
+                break;
             }
-            break;
         }
     }
 
