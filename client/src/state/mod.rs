@@ -94,6 +94,8 @@ impl<'connection> State<'connection> {
             match opcode {
                 Op::LoginInfo => self.handle_login_info(message),
                 Op::SetupGame => self.handle_setup_game(message),
+                Op::Angle1 | Op::Angle2 | Op::Angle3 | Op::Angle4 | Op::Angle5
+                    => self.handle_angle(message, opcode),
                 Op::GameOver => self.handle_game_over(),
                 Op::UpdateFullness => self.handle_update_fullness(message),
                 Op::SnakeAction => self.handle_snake_action(message),

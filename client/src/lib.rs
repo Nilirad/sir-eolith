@@ -37,6 +37,8 @@ mod consts {
 
 pub use state::State;
 
+const REV_ANGLE: f32 = 2.0 * std::f32::consts::PI;
+
 fn modulo(n: f32, modulus: f32) -> f32 {
     let result = n % modulus;
     if result < 0.0 {

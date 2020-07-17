@@ -1,5 +1,5 @@
 use crate::nalgebra_prelude::*;
-use crate::modulo;
+use crate::{modulo, REV_ANGLE};
 use derive_more::{Add, AddAssign};
 
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq, Add, AddAssign)]
@@ -86,8 +86,6 @@ pub struct Movement {
 }
 
 impl Movement {
-    const REV_ANGLE: f32 = 2.0 * std::f32::consts::PI;
-
     pub fn new(speed: f32, angle: f32, target_angle: f32, direction: Direction) -> Self {
         Self {
             speed,
@@ -104,7 +102,7 @@ impl Movement {
     pub fn update_angle(&mut self, mamu: f32, vfr: f32, scang: f32, spangdv: f32) {
         let delta_angle = mamu * vfr * scang * self.spang(spangdv);
         if self.direction != Direction::None {
-            self.angle = modulo(self.angle - delta_angle, Self::REV_ANGLE);
+            self.angle = modulo(self.angle - delta_angle, REV_ANGLE);
             if self.ending_rotation() {
                 self.angle = self.target_angle;
                 self.direction = Direction::None;
@@ -115,11 +113,11 @@ impl Movement {
     }
 
     fn ending_rotation(&self) -> bool {
-        let mut h = (self.target_angle - self.angle) % Self::REV_ANGLE;
+        let mut h = (self.target_angle - self.angle) % REV_ANGLE;
         if h < 0.0 {
-            h += Self::REV_ANGLE;
+            h += REV_ANGLE;
             if h > std::f32::consts::PI {
-                h -= Self::REV_ANGLE;
+                h -= REV_ANGLE;
             }
         }
 
