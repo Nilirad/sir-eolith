@@ -31,87 +31,70 @@ impl<'connection> State<'connection> {
     pub fn handle_angle(&mut self, mut message: ServerMsg, opcode: Op) {
         let id = message.read_id();
 
-        let mut direction = None;
-        let mut angle = -1.0;
-        let mut target_angle = -1.0;
-        let mut speed = -1.0;
-        match message.len() {
-            8 => {
-                direction = if opcode == Op::Angle1 {
-                    Some(Direction::Left)
-                } else {
-                    Some(Direction::Right)
-                };
-                angle = message.read_angle_short();
-                target_angle = message.read_angle_short();
-                speed = message.read_speed_short();
-            }
-            7 => {
-                match opcode {
-                    Op::Angle1 => {
-                        angle = message.read_angle_short();
-                        speed = message.read_speed_short();
-                    }
-                    Op::Angle2 => {
-                        direction = Some(Direction::Left);
-                        target_angle = message.read_angle_short();
-                        speed = message.read_speed_short();
-                    }
-                    Op::Angle3 => {
-                        direction = Some(Direction::Left);
-                        angle = message.read_angle_short();
-                        target_angle = message.read_angle_short();
-                    }
-                    Op::Angle4 => {
-                        direction = Some(Direction::Right);
-                        target_angle = message.read_angle_short();
-                        speed = message.read_speed_short();
-                    }
-                    Op::Angle5 => {
-                        direction = Some(Direction::Right);
-                        angle = message.read_angle_short();
-                        target_angle = message.read_angle_short();
-                    }
-                    _ => unreachable!(),
-                }
-            },
-            6 => {
-                match opcode {
-                    Op::Angle1 => {
-                        angle = message.read_angle_short();
-                    }
-                    Op::Angle2 => {
-                        direction = Some(Direction::Left);
-                        target_angle = message.read_angle_short();
-                    }
-                    Op::Angle3 => {
-                        speed = message.read_speed_short();
-                    }
-                    Op::Angle4 => {
-                        direction = Some(Direction::Right);
-                        target_angle = message.read_angle_short();
-                    }
-                    _ => unreachable!(),
-                }
-            }
-            _ => unreachable!(),
-        }
-
         let query = <(Read<Id>, Write<Movement>)>::query();
         for (snake_id, mut movement) in query.iter_mut(&mut self.world) {
             if *snake_id == id {
-                if let Some(direction) = direction {
-                    movement.direction = direction;
-                }
-                if angle != -1.0 {
-                    movement.angle = angle;
-                }
-                if target_angle != -1.0 {
-                    movement.target_angle = target_angle;
-                }
-                if speed != -1.0 {
-                    movement.speed = speed;
-                }
+                match message.len() {
+                    8 => {
+                        movement.direction = if opcode == Op::Angle1 {
+                            Direction::Left
+                        } else {
+                            Direction::Right
+                        };
+                        movement.angle = message.read_angle_short();
+                        movement.target_angle = message.read_angle_short();
+                        movement.speed = message.read_speed_short();
+                    }
+                    7 => {
+                        match opcode {
+                            Op::Angle1 => {
+                                movement.angle = message.read_angle_short();
+                                movement.speed = message.read_speed_short();
+                            }
+                            Op::Angle2 => {
+                                movement.direction = Direction::Left;
+                                movement.target_angle = message.read_angle_short();
+                                movement.speed = message.read_speed_short();
+                            }
+                            Op::Angle3 => {
+                                movement.direction = Direction::Left;
+                                movement.angle = message.read_angle_short();
+                                movement.target_angle = message.read_angle_short();
+                            }
+                            Op::Angle4 => {
+                                movement.direction = Direction::Right;
+                                movement.target_angle = message.read_angle_short();
+                                movement.speed = message.read_speed_short();
+                            }
+                            Op::Angle5 => {
+                                movement.direction = Direction::Right;
+                                movement.angle = message.read_angle_short();
+                                movement.target_angle = message.read_angle_short();
+                            }
+                            _ => unreachable!(),
+                        }
+                    },
+                    6 => {
+                        match opcode {
+                            Op::Angle1 => {
+                                movement.angle = message.read_angle_short();
+                            }
+                            Op::Angle2 => {
+                                movement.direction = Direction::Left;
+                                movement.target_angle = message.read_angle_short();
+                            }
+                            Op::Angle3 => {
+                                movement.speed = message.read_speed_short();
+                            }
+                            Op::Angle4 => {
+                                movement.direction = Direction::Right;
+                                movement.target_angle = message.read_angle_short();
+                            }
+                            _ => unreachable!(),
+                        }
+                    }
+                    _ => unreachable!(),
+                } 
             }
             break;
         }
