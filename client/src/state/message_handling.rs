@@ -2,7 +2,6 @@ use super::State;
 use crate::connection::{ClientMsg, ServerMsg, Op, ConnectionState};
 use crate::types::*;
 use crate::nalgebra_prelude::*;
-use crate::REV_ANGLE;
 use legion::prelude::*;
 
 impl<'connection> State<'connection> {
@@ -18,11 +17,11 @@ impl<'connection> State<'connection> {
         let _mscps = message.read_u16();
         self.params.sector_size = message.read_u16() as f32;
         message.skip(2); // `sector_count_along_edge` is unused.
-        self.params.spangdv = message.read_u8() as f32;
+        self.params.spangdv = message.read_u8() as f32 / 10.0;
         message.go_to(19);
-        self.params.mamu = message.read_u16() as f32;
+        self.params.mamu = message.read_u16() as f32 / 1000.0;
         message.go_to(23);
-        self.params.cst = message.read_u16() as f32;
+        self.params.cst = message.read_u16() as f32 / 1000.0;
         
         info!("Logged into server.");
         self.connection.set_state(ConnectionState::Playing);
