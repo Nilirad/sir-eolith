@@ -50,9 +50,11 @@ impl<'connection> State<'connection> {
             };
             let width = 29.0 * body.sc();
 
-            let points = body.points.iter()
+            let mut points = body.points.iter()
                 .map(|v| ggez::mint::Point2 {x: v.x, y: v.y})
                 .collect::<Vec<ggez::mint::Point2<f32>>>();
+
+            points.push(ggez::mint::Point2 {x: pos.x, y: pos.y});
 
             mesh_builder = mesh_builder.line(
                 points.as_slice(),
