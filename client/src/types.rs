@@ -100,9 +100,10 @@ impl Movement {
     }
 
     pub fn update_angle(&mut self, mamu: f32, vfr: f32, scang: f32, spangdv: f32) {
-        let delta_angle = mamu * vfr * scang * self.spang(spangdv);
+        let delta_angle = mamu * vfr * scang * self.spang(spangdv) * self.direction.value();
+        // TODO: Use match expression
         if self.direction != Direction::None {
-            self.angle = modulo(self.angle - delta_angle, REV_ANGLE);
+            self.angle = modulo(self.angle + delta_angle, REV_ANGLE);
             if self.ending_rotation() {
                 self.angle = self.target_angle;
                 self.direction = Direction::None;
