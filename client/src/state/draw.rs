@@ -78,10 +78,30 @@ impl<'connection> State<'connection> {
                 },
             ];
 
+            let wang_line = vec![
+                ggez::mint::Point2 {x: pos.x, y: pos.y},
+                ggez::mint::Point2 {
+                    x: pos.x + 100.0 * movement.target_angle.cos(),
+                    y: pos.y + 100.0 * movement.target_angle.sin(),
+                },
+            ];
+
+            let color = match movement.direction {
+                Direction::None => Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 },
+                Direction::Left => Color { r: 0.0, g: 1.0, b: 0.0, a: 1.0 },
+                Direction::Right => Color { r: 0.0, g: 0.0, b: 1.0, a: 1.0 },
+            };
+
+            mesh_builder = mesh_builder.line(
+                wang_line.as_slice(),
+                5.0,
+                Color { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+            )?;
+
             mesh_builder = mesh_builder.line(
                 ang_line.as_slice(),
                 5.0,
-                Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 },
+                color,
             )?;
         }
 
