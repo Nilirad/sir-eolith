@@ -38,8 +38,8 @@ impl<'connection> State<'connection> {
 
     /// Draws the snakes.
     fn draw_snakes(&mut self, mut mesh_builder: &mut MeshBuilder) -> GameResult {
-        let query = <(Read<Id>, Read<Pos>, Read<Body>, Read<Movement>)>::query();
-        for (id, pos, body, movement) in query.iter(&mut self.world) {
+        let query = <(Read<Id>, Read<Pos>, Read<Body>)>::query();
+        for (id, pos, body) in query.iter(&mut self.world) {
             // TODO: Wrap in function `color_from_id()`
             let color = {
                 let r = *id & 0xFF00;
@@ -70,7 +70,7 @@ impl<'connection> State<'connection> {
                 Color::new(0.0, 0.5, 0.0, 1.0),
             );
 
-            let ang_line = vec![
+            /* let ang_line = vec![
                 ggez::mint::Point2 {x: pos.x, y: pos.y},
                 ggez::mint::Point2 {
                     x: pos.x + 100.0 * movement.angle.cos(),
@@ -102,7 +102,7 @@ impl<'connection> State<'connection> {
                 ang_line.as_slice(),
                 5.0,
                 color,
-            )?;
+            )?; */
         }
 
         Ok(())
