@@ -101,7 +101,6 @@ impl Movement {
 
     pub fn update_angle(&mut self, mamu: f32, vfr: f32, scang: f32, spangdv: f32) {
         let delta_angle = mamu * vfr * scang * self.spang(spangdv) * self.direction.value();
-        // TODO: Use match expression
         match self.direction {
             Direction::None => self.angle = self.target_angle,
             _ => {
@@ -118,11 +117,15 @@ impl Movement {
         let mut h = (self.target_angle - self.angle) % REV_ANGLE;
         if h < 0.0 {
             h += REV_ANGLE;
-            if h > std::f32::consts::PI {
-                h -= REV_ANGLE;
-            }
         }
-
-        h > 0.0
+        if h > std::f32::consts::PI {
+            h -= REV_ANGLE;
+        }
+        
+        match self.direction {
+            Direction::Left => h > 0.0,
+            Direction::Right => h < 0.0,
+            _ => unreachable!(),
+        }
     }
 }
