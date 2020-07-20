@@ -121,11 +121,7 @@ impl Movement {
         if h > std::f32::consts::PI {
             h -= REV_ANGLE;
         }
-        
-        match self.direction {
-            Direction::Left => h > 0.0,
-            Direction::Right => h < 0.0,
-            _ => unreachable!(),
-        }
+
+        h * self.direction.value() < 0.0
     }
 }
