@@ -9,6 +9,8 @@ use crate::controller::SnakeController;
 use std::time::Instant;
 use legion::prelude::*;
 use legion::borrow::RefMut;
+
+const INITIAL_ZOOM: f32 = 16.2 / 14.0;
 struct Ping {
     waiting_response: bool,
     since: Instant,
@@ -73,6 +75,7 @@ pub struct State<'connection> {
     ping_status: Ping,
     last_update: Instant,
     player_set: bool,
+    zoom_factor: f32,
     params: Params,
 }
 
@@ -85,6 +88,7 @@ impl<'connection> State<'connection> {
             ping_status: Ping::new(false),
             last_update: Instant::now(),
             player_set: false,
+            zoom_factor: INITIAL_ZOOM,
             params: Params::default(),
         }
     }
@@ -227,6 +231,10 @@ impl<'connection> EventHandler for State<'connection> {
     /// Handles mouse buttons being lifted.
     fn mouse_button_up_event(&mut self, _ctx: &mut Context, _button: MouseButton, _x: f32, _y: f32) {
         self.controller.set_mouse_pressed(false);
+    }
+
+    fn mouse_wheel_event(&mut self, _ctx: &mut Context, _x: f32, y: f32) {
+        self.zoom_factor = (self.zoom_factor - 0.1 * y).max(0.5);
     }
 
     fn quit_event(&mut self, _ctx: &mut Context) -> bool {

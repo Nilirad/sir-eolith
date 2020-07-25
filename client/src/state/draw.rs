@@ -4,10 +4,6 @@ use crate::types::*;
 use super::State;
 use legion::prelude::*;
 
-/// The area of the world visible to the player. The higher the number, the more zoomed
-/// out the view will be.
-const FIELD_OF_VIEW: f32 = 3.0;
-
 impl<'connection> State<'connection> {
     /// Draws the gameplay elements.
     pub fn draw_game(&mut self, ctx: &mut Context) -> GameResult {
@@ -131,10 +127,10 @@ impl<'connection> State<'connection> {
         
         for (pos,) in query.iter(&mut self.world) {
             let viewport = graphics::Rect {
-                x: pos.x - (FIELD_OF_VIEW * WINDOW_WIDTH / 2.0),
-                y: pos.y - (FIELD_OF_VIEW * WINDOW_HEIGHT / 2.0),
-                w: FIELD_OF_VIEW * WINDOW_WIDTH,
-                h: FIELD_OF_VIEW * WINDOW_HEIGHT,
+                x: pos.x - (self.zoom_factor * WINDOW_WIDTH / 2.0),
+                y: pos.y - (self.zoom_factor * WINDOW_HEIGHT / 2.0),
+                w: self.zoom_factor * WINDOW_WIDTH,
+                h: self.zoom_factor * WINDOW_HEIGHT,
             };
             graphics::set_screen_coordinates(ctx, viewport)?;
         }
