@@ -266,6 +266,19 @@ impl<'connection> EventHandler for State<'connection> {
         }
     }
 
+    fn key_down_event(
+            &mut self,
+            _ctx: &mut Context,
+            keycode: KeyCode,
+            _keymods: KeyMods,
+            _repeat: bool,
+        ) {
+        match keycode {
+            KeyCode::Z => self.zoom.0 = None,
+            _ => (),
+        }
+    }
+
     fn quit_event(&mut self, _ctx: &mut Context) -> bool {
         self.connection.close();
         false
