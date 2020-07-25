@@ -122,15 +122,16 @@ impl<'connection> State<'connection> {
     
     /// Updates the viewport, centering it to the player's snake's head.
     fn update_viewport(&mut self, ctx: &mut Context) -> GameResult {
-        let query = <(Read<Pos>,)>::query()
+        let query = <(Read<Pos>, Read<Body>)>::query()
             .filter(tag_value(&PlayerTag(PlayerType::You)));
         
-        for (pos,) in query.iter(&mut self.world) {
+        for (pos, body) in query.iter(&mut self.world) {
+            let scale = 1.0 / self.zoom.factor(body.length());
             let viewport = graphics::Rect {
-                x: pos.x - (self.zoom_factor * WINDOW_WIDTH / 2.0),
-                y: pos.y - (self.zoom_factor * WINDOW_HEIGHT / 2.0),
-                w: self.zoom_factor * WINDOW_WIDTH,
-                h: self.zoom_factor * WINDOW_HEIGHT,
+                x: pos.x - (scale * WINDOW_WIDTH / 2.0),
+                y: pos.y - (scale * WINDOW_HEIGHT / 2.0),
+                w: scale * WINDOW_WIDTH,
+                h: scale * WINDOW_HEIGHT,
             };
             graphics::set_screen_coordinates(ctx, viewport)?;
         }

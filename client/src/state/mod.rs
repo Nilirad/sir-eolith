@@ -10,7 +10,6 @@ use std::time::Instant;
 use legion::prelude::*;
 use legion::borrow::RefMut;
 
-const INITIAL_ZOOM: f32 = 16.2 / 14.0;
 struct Ping {
     waiting_response: bool,
     since: Instant,
@@ -48,6 +47,23 @@ impl Ping {
     }
 }
 
+/// Game zoom. If `None`, zoom is automatic. If `Some`, zoom is manual, defined by the
+/// inner value.
+struct Zoom(Option<f32>);
+
+impl Zoom {
+    pub fn new() -> Self {
+        Self(None)
+    }
+
+    pub fn factor(&self, body_length: f32) -> f32 {
+        match self.0 {
+            Some(factor) => factor,
+            None => 0.64285 + 0.514285714 / 1.0f32.max((body_length + 16.0) / 36.0),
+        }
+    }
+}
+
 struct Params {
     world_radius: f32,
     sector_size: f32,
@@ -75,7 +91,7 @@ pub struct State<'connection> {
     ping_status: Ping,
     last_update: Instant,
     player_set: bool,
-    zoom_factor: f32,
+    zoom: Zoom,
     params: Params,
 }
 
@@ -88,7 +104,7 @@ impl<'connection> State<'connection> {
             ping_status: Ping::new(false),
             last_update: Instant::now(),
             player_set: false,
-            zoom_factor: INITIAL_ZOOM,
+            zoom: Zoom::new(),
             params: Params::default(),
         }
     }
@@ -234,7 +250,20 @@ impl<'connection> EventHandler for State<'connection> {
     }
 
     fn mouse_wheel_event(&mut self, _ctx: &mut Context, _x: f32, y: f32) {
-        self.zoom_factor = (self.zoom_factor - 0.1 * y).max(0.5);
+        self.zoom.0 = match self.zoom.0 {
+            Some(factor) => Some((factor + 0.1 * y).max(0.3).min(2.0)),
+            None => {
+                let query = <(Read<Body>,)>::query()
+                    .filter(tag_value(&PlayerTag(PlayerType::You)));
+                    let mut result = None;
+                    for (body,) in query.iter(&mut self.world) {
+                        let cur_zoom = self.zoom.factor(body.length());
+                        result = Some((cur_zoom + 0.1 * y).min(0.5));
+                    }
+
+                    result
+            },
+        }
     }
 
     fn quit_event(&mut self, _ctx: &mut Context) -> bool {
