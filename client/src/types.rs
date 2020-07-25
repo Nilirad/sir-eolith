@@ -48,6 +48,10 @@ impl Body {
         self.points.remove(0); // TODO: Checking if exist? Use VecDeque?
     }
 
+    pub fn length(&self) -> f32 {
+        self.points.len() as f32
+    }
+
     pub fn head_pos(&self) -> Pos {
         self.points.last().copied().unwrap()
     }
