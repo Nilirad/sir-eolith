@@ -292,8 +292,40 @@ impl<'connection> State<'connection> {
 
     }
 
-    pub fn handle_prey_action(&mut self, mut _message: ServerMsg) {
-        
+    pub fn handle_prey_action(&mut self, mut message: ServerMsg) {
+        let id = message.read_id();
+
+        match message.len() {
+            5 | 7 => { // TODO: Treat 7 as separate case when rendering gravitation.
+                println!("Prey unloaded.");
+                if let Some(prey) = self.find_prey_with_id(id) {
+                    self.world.delete(prey);
+                }
+            }
+            _ => {
+                println!("Prey loaded.");
+                let _color = message.read_u8();
+                let pos = message.read_pos_6_bytes();
+                let size = message.read_size();
+                let _direction = message.read_u8() as f32 - 48.0;
+                let target_angle = message.read_angle();
+                let angle = message.read_angle();
+                let speed = message.read_speed();
+
+                // TODO: Check if this is ok for preys.
+                let movement = Movement::new(speed, angle, target_angle, Direction::None);
+
+                self.world.insert(
+                    (PreyTag,),
+                    vec![(
+                        id,
+                        pos,
+                        size,
+                        movement,
+                    )]
+                );
+            }
+        }
     }
 }
 
