@@ -287,6 +287,14 @@ impl<'connection> State<'connection> {
         }
         
     }
+
+    pub fn handle_update_prey(&mut self, mut _message: ServerMsg) {
+
+    }
+
+    pub fn handle_prey_action(&mut self, mut _message: ServerMsg) {
+        
+    }
 }
 
 pub fn decrypt_message(message: ServerMsg) -> ClientMsg {
