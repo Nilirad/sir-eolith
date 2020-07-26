@@ -330,7 +330,6 @@ checksum = "f86c952727a495bda7abaf09bafdee1a939194dd793d9a8e26281df55ac43b00"
 name = "client"
 version = "0.1.0"
 dependencies = [
- "derive_more",
  "ggez",
  "legion",
  "log 0.4.8",
@@ -565,17 +564,6 @@ name = "derivative"
 version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cb582b60359da160a9477ee80f15c8d784c477e69c217ef2cdd4169c24ea380f"
-dependencies = [
- "proc-macro2 1.0.18",
- "quote 1.0.6",
- "syn 1.0.30",
-]
-
-[[package]]
-name = "derive_more"
-version = "0.99.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2127768764f1556535c01b5326ef94bd60ff08dcfbdc544d53e69ed155610f5d"
 dependencies = [
  "proc-macro2 1.0.18",
  "quote 1.0.6",
