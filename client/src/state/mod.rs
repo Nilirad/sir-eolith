@@ -127,6 +127,8 @@ impl<'connection> State<'connection> {
                 Op::LoadSectorFood => self.handle_load_sector_food(message),
                 Op::SnakeFood | Op::SpawnFood => self.handle_load_single_food(message),
                 Op::EatFood => self.handle_eat_food(message),
+                Op::UpdatePrey => self.handle_update_prey(message),
+                Op::PreyAction => self.handle_prey_action(message),
             }    
         }
     }

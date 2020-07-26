@@ -46,6 +46,10 @@ pub enum Op {
     SpawnFood = 'f' as u8,
     /// Unload a single food that has just been eaten.
     EatFood = 'c' as u8,
+    /// Updates the state of a prey.
+    UpdatePrey = 'j' as u8,
+    /// Loads or unloads a prey.
+    PreyAction = 'y' as u8,
 }
 
 pub type ClientMsg = Vec<u8>;
