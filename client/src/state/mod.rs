@@ -131,14 +131,6 @@ impl<'connection> State<'connection> {
         }
     }
 
-    fn time_since_last_update(&mut self) -> Milliseconds {
-        let now = Instant::now();
-        let delta = (now - self.last_update).as_millis();
-        self.last_update = now;
-
-        Milliseconds(delta)
-    }
-
     fn server_ping(&mut self) {
         const PING_MESSAGE: [u8; 1] = [0xFB];
 
@@ -198,7 +190,9 @@ impl<'connection> State<'connection> {
 
 impl<'connection> EventHandler for State<'connection> {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
-        let delta = self.time_since_last_update();
+        let now = Instant::now();
+        let delta = (now - self.last_update).as_millis();
+        self.last_update = now;
         
         for message in self.connection.poll_messages() {
             self.handle_server_message(message);
@@ -211,9 +205,7 @@ impl<'connection> EventHandler for State<'connection> {
         }
 
         self.ping_status.update_lag_multiplier();
-        let vfr = (delta.0 as f32 / 8.0).max(1.56).min(5.0) * self.ping_status.lag_multiplier;
-        //println!("delta: {}", delta.0);
-        //println!("vfr: {}", vfr);
+        let vfr = (delta as f32 / 8.0).max(1.56).min(5.0) * self.ping_status.lag_multiplier;
 
         let query = <(Write<Pos>, Read<Body>, Write<Movement>)>::query();
         for (mut pos, body, mut movement) in query.iter_mut(&mut self.world) {

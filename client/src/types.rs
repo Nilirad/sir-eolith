@@ -1,9 +1,5 @@
 use crate::nalgebra_prelude::*;
 use crate::{modulo, REV_ANGLE};
-use derive_more::{Add, AddAssign};
-
-#[derive(Debug, Copy, Clone, PartialOrd, PartialEq, Add, AddAssign)]
-pub struct Milliseconds(pub u128);
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum PlayerType {

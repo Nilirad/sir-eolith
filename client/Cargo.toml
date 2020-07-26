@@ -11,4 +11,3 @@ log = "0.4.8"
 ggez = "0.5.1"
 legion = { git = "https://github.com/TomGillen/legion" }
 num_enum = "0.5.0"
-derive_more = "0.99.7"
