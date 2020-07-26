@@ -1,9 +1,9 @@
 //! Allows the user to send snake movement requests to the server.
 
 use crate::nalgebra_prelude::*;
-use crate::types::Milliseconds;
 use crate::connection::Connection;
 use std::f32::consts::PI;
+use std::time::{Duration, Instant};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Mouse {
@@ -36,9 +36,9 @@ pub struct SnakeController {
     /// `true` if the mouse left button state changed over the last update.
     mouse_pressed_changed: bool,
     /// The cooldown time for sending a steering message to the server.
-    steer_cooldown: Milliseconds,
+    steer_instant: Instant,
     /// The cooldown time for sending a boost message to the server.
-    boost_cooldown: Milliseconds,
+    boost_instant: Instant,
     /// The last angle message sent to the server.
     last_send_angle: u8, // TODO: Make option, for initialization
 }
@@ -50,8 +50,8 @@ impl SnakeController {
             mouse: Mouse::new(),
             mouse_pos_changed: false,
             mouse_pressed_changed: false,
-            steer_cooldown: Milliseconds(0),
-            boost_cooldown: Milliseconds(0),
+            steer_instant: Instant::now(),
+            boost_instant: Instant::now(),
             last_send_angle: 0, // TODO: Make None, for initialization
         }
     }
@@ -74,43 +74,39 @@ impl SnakeController {
     }
 
     /// Moves the snake by sending steering and boosting messages to the server.
-    pub fn move_snake(&mut self, delta: Milliseconds, connection: &mut dyn Connection) {
-        
-        
-        self.handle_snake_steer(delta, connection);
-        self.handle_snake_boost(delta, connection);
+    pub fn move_snake(&mut self, connection: &mut dyn Connection) {
+        let now = Instant::now();
+        self.handle_snake_steer(now, connection);
+        self.handle_snake_boost(now, connection);
     }
 
     /// Handles snake steering.
-    fn handle_snake_steer(&mut self, delta: Milliseconds, connection: &mut dyn Connection) {
-        const STEER_COOLDOWN: Milliseconds = Milliseconds(100);
+    fn handle_snake_steer(&mut self, now: Instant, connection: &mut dyn Connection) {
+        const STEER_COOLDOWN: Duration = Duration::from_millis(100);
 
-        self.steer_cooldown += delta;
-        if self.mouse_pos_changed && self.steer_cooldown >= STEER_COOLDOWN {
+        if self.mouse_pos_changed && now >= self.steer_instant {
             self.mouse_pos_changed = false;
-            self.steer_cooldown = Milliseconds(0);
             let mouse_angle = angle(self.mouse.pos);
             let send_angle = (251.0 * mouse_angle / (2.0 * PI)).floor() as u8;
-            if self.last_send_angle != send_angle {                
+            if self.last_send_angle != send_angle {
                 self.last_send_angle = send_angle;
                 connection.send(vec![send_angle]);
+                self.steer_instant = now + STEER_COOLDOWN;
             }
         }
     }
 
     /// Handles snake boosting.
-    fn handle_snake_boost(&mut self, delta: Milliseconds, connection: &mut dyn Connection) {
-        const BOOST_COOLDOWN: Milliseconds = Milliseconds(150);
+    fn handle_snake_boost(&mut self, now: Instant, connection: &mut dyn Connection) {
+        const BOOST_COOLDOWN: Duration = Duration::from_millis(150);
 
-        self.boost_cooldown += delta;
-        if self.mouse_pressed_changed && self.boost_cooldown >= BOOST_COOLDOWN {
-            self.mouse_pressed_changed = false;
-            self.boost_cooldown = Milliseconds(0);
-            if self.mouse.pressed {
-                connection.send(START_BOOST_MESSAGE.to_vec());
-            } else {
-                connection.send(STOP_BOOST_MESSAGE.to_vec());
-            }
+        if self.mouse_pressed_changed && now >= self.boost_instant {
+            self.mouse_pos_changed = false;
+            self.boost_instant = now + BOOST_COOLDOWN;
+            connection.send(
+                if self.mouse.pressed { START_BOOST_MESSAGE.to_vec() }
+                else { STOP_BOOST_MESSAGE.to_vec() }
+            );
         }
     }
 }

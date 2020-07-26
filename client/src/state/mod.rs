@@ -207,7 +207,7 @@ impl<'connection> EventHandler for State<'connection> {
         self.server_ping();
 
         if self.connection.state() == ConnectionState::Playing {
-            self.controller.move_snake(delta, self.connection);
+            self.controller.move_snake(self.connection);
         }
 
         self.ping_status.update_lag_multiplier();
