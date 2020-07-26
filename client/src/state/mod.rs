@@ -152,6 +152,17 @@ impl<'connection> State<'connection> {
         None
     }
 
+    fn find_prey_with_id(&self, id: Id) -> Option<Entity> {
+        let query = <(Read<Id>,)>::query()
+            .filter(tag::<PreyTag>());
+        for (entity, (prey_id,)) in query.iter_entities(&self.world) {
+            if *prey_id == id {
+                return Some(entity);
+            }
+        }
+        None
+    }
+
     fn get_snake_components(&mut self, id: Id) -> Option<(RefMut<Pos>, RefMut<Body>, RefMut<Movement>)> {
         let query = <(Read<Id>, Write<Pos>, Write<Body>, Write<Movement>)>::query();
         for (snake_id, pos, body, movement) in query.iter_mut(&mut self.world) {
