@@ -13,6 +13,7 @@ impl<'connection> State<'connection> {
 
         self.draw_border(&mut mesh_builder);
         self.draw_food(&mut mesh_builder);
+        self.draw_preys(&mut mesh_builder);
         self.draw_snakes(&mut mesh_builder)?;
 
         let mesh = mesh_builder.build(ctx)?;
@@ -116,6 +117,22 @@ impl<'connection> State<'connection> {
                 *size,
                 0.1,
                 FOOD_COLOR,
+            );
+        }
+    }
+
+    fn draw_preys(&mut self, mut mesh_builder: &mut MeshBuilder) {
+        const PREY_COLOR: Color = Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
+        
+        let query = <(Read<Pos>, Read<Size>)>::query()
+            .filter(tag::<PreyTag>());
+        for (pos, size) in query.iter(&self.world) {
+            mesh_builder = mesh_builder.circle(
+                graphics::DrawMode::fill(),
+                na::Point2::new(pos.x, pos.y),
+                *size * 3.0, // TODO: Fix real size.
+                0.5,
+                PREY_COLOR,
             );
         }
     }
