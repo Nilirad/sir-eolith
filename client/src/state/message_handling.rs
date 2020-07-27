@@ -288,8 +288,56 @@ impl<'connection> State<'connection> {
         
     }
 
-    pub fn handle_update_prey(&mut self, mut _message: ServerMsg) {
+    pub fn handle_update_prey(&mut self, mut message: ServerMsg) {
+        let id = message.read_id();
+        let query = <(Read<Id>, Write<Pos>, Write<Movement>)>::query()
+            .filter(tag::<PreyTag>());
+        for (prey_id, mut pos, mut movement) in query.iter_mut(&mut self.world) {
+            if *prey_id == id {
+                let displacement = self.ping_status.lag_multiplier * movement.speed / 4.0;
+                let msg_pos = message.read_prey_pos();
+                *pos = Pos::new(
+                    msg_pos.x + movement.angle.cos() * displacement,
+                    msg_pos.y + movement.angle.sin() * displacement,
+                );
 
+                match message.len() {
+                    18 => {
+                        movement.direction = message.read_direction();
+                        movement.angle = message.read_angle();
+                        movement.target_angle = message.read_angle();
+                        movement.speed = message.read_speed();
+                    }
+                    14 => {
+                        movement.angle = message.read_angle();
+                        movement.speed = message.read_speed();
+                    }
+                    15 => {
+                        movement.direction = message.read_direction();
+                        movement.target_angle = message.read_angle();
+                        movement.speed = message.read_speed();
+                    }
+                    16 => {
+                        movement.direction = message.read_direction();
+                        movement.angle = message.read_angle();
+                        movement.target_angle = message.read_angle();
+                    }
+                    12 => {
+                        movement.angle = message.read_angle();
+                    }
+                    13 => {
+                        movement.direction = message.read_direction();
+                        movement.target_angle = message.read_angle();
+                    }
+                    11 => {
+                        movement.speed = message.read_speed();
+                    }
+                    _ => unreachable!(),
+                }
+
+                break;
+            }
+        }
     }
 
     pub fn handle_prey_action(&mut self, mut message: ServerMsg) {
@@ -307,13 +355,12 @@ impl<'connection> State<'connection> {
                 let _color = message.read_u8();
                 let pos = message.read_pos_6_bytes();
                 let size = message.read_size();
-                let _direction = message.read_u8() as f32 - 48.0;
+                let direction = message.read_direction();
                 let target_angle = message.read_angle();
                 let angle = message.read_angle();
                 let speed = message.read_speed();
 
-                // TODO: Check if this is ok for preys.
-                let movement = Movement::new(speed, angle, target_angle, Direction::None);
+                let movement = Movement::new(speed, angle, target_angle, direction);
 
                 self.world.insert(
                     (PreyTag,),
