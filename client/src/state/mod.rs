@@ -6,6 +6,8 @@ use crate::connection::{Op, ServerMsg, Connection, ConnectionState};
 use crate::types::*;
 use crate::consts::*;
 use crate::controller::SnakeController;
+use crate::REV_ANGLE;
+use crate::modulo;
 use std::time::Instant;
 use legion::prelude::*;
 use legion::borrow::RefMut;
@@ -69,6 +71,7 @@ struct Params {
     sector_size: f32,
     spangdv: f32,
     mamu: f32,
+    prey_mamu: f32,
     cst: f32,
 }
 
@@ -79,6 +82,7 @@ impl Default for Params {
             sector_size: 480.0,
             spangdv: 4.8,
             mamu: 0.033,
+            prey_mamu: 0.028,
             cst: 0.43,
         }
     }
@@ -220,11 +224,33 @@ impl<'connection> EventHandler for State<'connection> {
         self.ping_status.update_lag_multiplier();
         let vfr = (delta as f32 / 8.0).max(1.56).min(5.0) * self.ping_status.lag_multiplier;
 
+        // TODO: Refactor in own function
         let query = <(Write<Pos>, Read<Body>, Write<Movement>)>::query();
         for (mut pos, body, mut movement) in query.iter_mut(&mut self.world) {
             movement.update_angle(self.params.mamu, vfr, body.scang(), self.params.spangdv);
 
             let displacement = movement.speed * vfr / 4.0; // TODO: add .min(msl)
+            pos.x += movement.angle.cos() * displacement;
+            pos.y += movement.angle.sin() * displacement;
+        }
+
+        // TODO: Refactor in own function
+        let prey_delta_angle = self.params.prey_mamu * vfr;
+        let query = <(Write<Pos>, Write<Movement>)>::query()
+            .filter(tag::<PreyTag>());
+        for (mut pos, mut movement) in query.iter_mut(&mut self.world) {
+            match movement.direction {
+                Direction::None => movement.angle = movement.target_angle,
+                _ => {
+                    movement.angle = modulo(movement.angle + prey_delta_angle, REV_ANGLE);
+                    if movement.ending_rotation() {
+                        movement.angle = movement.target_angle;
+                        movement.direction = Direction::None;
+                    }
+                }
+            }
+
+            let displacement = movement.speed * vfr / 4.0;
             pos.x += movement.angle.cos() * displacement;
             pos.y += movement.angle.sin() * displacement;
         }
