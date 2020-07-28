@@ -20,7 +20,7 @@ impl<'connection> State<'connection> {
         self.params.spangdv = message.read_u8() as f32 / 10.0;
         message.go_to(19);
         self.params.mamu = message.read_u16() as f32 / 1000.0;
-        message.go_to(23);
+        self.params.prey_mamu = message.read_u16() as f32 / 1000.0;
         self.params.cst = message.read_u16() as f32 / 1000.0;
         
         info!("Logged into server.");
