@@ -341,10 +341,13 @@ impl<'connection> State<'connection> {
     }
 
     pub fn handle_prey_action(&mut self, mut message: ServerMsg) {
+        const UNLOAD: usize = 5;
+        const EAT: usize = 7;
+        
         let id = message.read_id();
 
         match message.len() {
-            5 | 7 => { // TODO: Treat 7 as separate case when rendering gravitation.
+            UNLOAD | EAT => { // TODO: Treat EAT as separate case when rendering gravitation.
                 if let Some(prey) = self.find_prey_with_id(id) {
                     self.world.delete(prey);
                 }
