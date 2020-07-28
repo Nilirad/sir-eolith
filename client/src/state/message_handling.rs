@@ -345,13 +345,11 @@ impl<'connection> State<'connection> {
 
         match message.len() {
             5 | 7 => { // TODO: Treat 7 as separate case when rendering gravitation.
-                println!("Prey unloaded.");
                 if let Some(prey) = self.find_prey_with_id(id) {
                     self.world.delete(prey);
                 }
             }
             _ => {
-                println!("Prey loaded.");
                 let _color = message.read_u8();
                 let pos = message.read_pos_6_bytes();
                 let size = message.read_size();
