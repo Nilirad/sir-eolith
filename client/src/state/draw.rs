@@ -124,9 +124,9 @@ impl<'connection> State<'connection> {
     fn draw_preys(&mut self, mut mesh_builder: &mut MeshBuilder) {
         const PREY_COLOR: Color = Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
         
-        let query = <(Read<Pos>, Read<Size>)>::query()
+        let query = <(Read<Pos>, Read<Size>, Read<Movement>)>::query()
             .filter(tag::<PreyTag>());
-        for (pos, size) in query.iter(&self.world) {
+        for (pos, size, movement) in query.iter(&self.world) {
             mesh_builder = mesh_builder.circle(
                 graphics::DrawMode::fill(),
                 na::Point2::new(pos.x, pos.y),
@@ -134,6 +134,40 @@ impl<'connection> State<'connection> {
                 0.5,
                 PREY_COLOR,
             );
+
+            let ang_line = vec![
+                ggez::mint::Point2 {x: pos.x, y: pos.y},
+                ggez::mint::Point2 {
+                    x: pos.x + 100.0 * movement.angle.cos(),
+                    y: pos.y + 100.0 * movement.angle.sin(),
+                },
+            ];
+
+            let wang_line = vec![
+                ggez::mint::Point2 {x: pos.x, y: pos.y},
+                ggez::mint::Point2 {
+                    x: pos.x + 100.0 * movement.target_angle.cos(),
+                    y: pos.y + 100.0 * movement.target_angle.sin(),
+                },
+            ];
+
+            let color = match movement.direction {
+                Direction::None => Color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 },
+                Direction::Left => Color { r: 0.0, g: 1.0, b: 0.0, a: 1.0 },
+                Direction::Right => Color { r: 0.0, g: 0.0, b: 1.0, a: 1.0 },
+            };
+
+            mesh_builder = mesh_builder.line(
+                wang_line.as_slice(),
+                5.0,
+                Color { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+            ).unwrap();
+
+            mesh_builder = mesh_builder.line(
+                ang_line.as_slice(),
+                5.0,
+                color,
+            ).unwrap();
         }
     }
     
