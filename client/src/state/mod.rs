@@ -203,6 +203,40 @@ impl<'connection> State<'connection> {
 
         result
     }
+
+    fn interpolate_snakes(&mut self, vfr: f32) {
+        let query = <(Write<Pos>, Read<Body>, Write<Movement>)>::query();
+        for (mut pos, body, mut movement) in query.iter_mut(&mut self.world) {
+            movement.update_angle(self.params.mamu, vfr, body.scang(), self.params.spangdv);
+
+            let displacement = movement.speed * vfr / 4.0; // TODO: add .min(msl)
+            pos.x += movement.angle.cos() * displacement;
+            pos.y += movement.angle.sin() * displacement;
+        }
+    }
+
+    fn interpolate_preys(&mut self, vfr: f32) {
+        let prey_base_delta_angle = self.params.prey_mamu * vfr;
+        let query = <(Write<Pos>, Write<Movement>)>::query()
+            .filter(tag::<PreyTag>());
+        for (mut pos, mut movement) in query.iter_mut(&mut self.world) {
+            match movement.direction {
+                Direction::None => movement.angle = movement.target_angle,
+                _ => {
+                    let delta_angle = prey_base_delta_angle * movement.direction.value();
+                    movement.angle = modulo(movement.angle + delta_angle, REV_ANGLE);
+                    if movement.ending_rotation() {
+                        movement.angle = movement.target_angle;
+                        movement.direction = Direction::None;
+                    }
+                }
+            }
+
+            let displacement = movement.speed * vfr / 4.0;
+            pos.x += movement.angle.cos() * displacement;
+            pos.y += movement.angle.sin() * displacement;
+        }
+    }
 }
 
 impl<'connection> EventHandler for State<'connection> {
@@ -224,37 +258,8 @@ impl<'connection> EventHandler for State<'connection> {
         self.ping_status.update_lag_multiplier();
         let vfr = (delta as f32 / 8.0).max(1.56).min(5.0) * self.ping_status.lag_multiplier;
 
-        // TODO: Refactor in own function
-        let query = <(Write<Pos>, Read<Body>, Write<Movement>)>::query();
-        for (mut pos, body, mut movement) in query.iter_mut(&mut self.world) {
-            movement.update_angle(self.params.mamu, vfr, body.scang(), self.params.spangdv);
-
-            let displacement = movement.speed * vfr / 4.0; // TODO: add .min(msl)
-            pos.x += movement.angle.cos() * displacement;
-            pos.y += movement.angle.sin() * displacement;
-        }
-
-        // TODO: Refactor in own function
-        let prey_base_delta_angle = self.params.prey_mamu * vfr;
-        let query = <(Write<Pos>, Write<Movement>)>::query()
-            .filter(tag::<PreyTag>());
-        for (mut pos, mut movement) in query.iter_mut(&mut self.world) {
-            match movement.direction {
-                Direction::None => movement.angle = movement.target_angle,
-                _ => {
-                    let delta_angle = prey_base_delta_angle * movement.direction.value();
-                    movement.angle = modulo(movement.angle + delta_angle, REV_ANGLE);
-                    if movement.ending_rotation() {
-                        movement.angle = movement.target_angle;
-                        movement.direction = Direction::None;
-                    }
-                }
-            }
-
-            let displacement = movement.speed * vfr / 4.0;
-            pos.x += movement.angle.cos() * displacement;
-            pos.y += movement.angle.sin() * displacement;
-        }
+        self.interpolate_snakes(vfr);
+        self.interpolate_preys(vfr);
 
         Ok(())
     }
