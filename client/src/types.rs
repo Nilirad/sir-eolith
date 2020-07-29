@@ -102,8 +102,7 @@ impl Movement {
         (self.speed / spangdv).min(1.0)
     }
 
-    // TODO: Don't just return a bool, do the thing itself! Don't let client code do the work
-    pub fn ending_rotation(&self) -> bool {
+    pub fn try_finish_rotation(&mut self) {
         let mut h = (self.target_angle - self.angle) % REV_ANGLE;
         if h < 0.0 {
             h += REV_ANGLE;
@@ -112,6 +111,9 @@ impl Movement {
             h -= REV_ANGLE;
         }
 
-        h * self.direction.value() < 0.0
+        if h * self.direction.value() < 0.0 {
+            self.angle = self.target_angle;
+            self.direction = Direction::None;
+        }
     }
 }
