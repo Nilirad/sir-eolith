@@ -71,6 +71,8 @@ struct Params {
     mamu: f32,
     prey_mamu: f32,
     cst: f32,
+    fmlts: Vec<f32>,
+    fpsls: Vec<f32>,
 }
 
 impl Default for Params {
@@ -82,6 +84,8 @@ impl Default for Params {
             mamu: 0.033,
             prey_mamu: 0.028,
             cst: 0.43,
+            fmlts: Vec::new(),
+            fpsls: Vec::new(),
         }
     }
 }
@@ -133,6 +137,7 @@ impl<'connection> State<'connection> {
                 Op::PingResponse => self.handle_ping_response(),
                 Op::PosAbs | Op::GrowAbs | Op::PosRel | Op::GrowRel
                     => self.handle_positioning_and_growth(message),
+                Op::UpdateStats => self.handle_update_stats(message),
                 Op::Shrink => self.handle_shrink(message),
                 Op::RemoveSectorFood => self.handle_remove_sector_food(message),
                 Op::LoadSectorFood => self.handle_load_sector_food(message),
@@ -151,6 +156,12 @@ impl<'connection> State<'connection> {
             self.connection.send(PING_MESSAGE.to_vec());
             self.ping_status.switch();
         }
+    }
+
+    fn score(&self, snake_point_count: usize, fullness: Fullness) -> u32 {
+        let fpsl = self.params.fpsls[snake_point_count];
+        let fmlt = self.params.fmlts[snake_point_count];
+        (15.0 * (fpsl + fullness / fmlt - 1.0) - 5.0).floor() as u32
     }
 
     fn find_snake_with_id(&self, id: Id) -> Option<Entity> {
