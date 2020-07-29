@@ -1,5 +1,5 @@
 use crate::nalgebra_prelude::*;
-use crate::REV_ANGLE;
+use crate::{modulo, REV_ANGLE};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum PlayerType {
@@ -102,7 +102,23 @@ impl Movement {
         (self.speed / spangdv).min(1.0)
     }
 
-    pub fn try_finish_rotation(&mut self) {
+    pub fn interpolate(&mut self, delta_angle: f32, vfr: f32) -> Pos {
+        match self.direction {
+            Direction::None => self.angle = self.target_angle,
+            _ => {
+                self.angle = modulo(self.angle + delta_angle, REV_ANGLE);
+                self.try_finish_rotation();
+            }
+        }
+
+        let displacement = self.speed * vfr / 4.0; // TODO: add .min(msl)
+        Pos::new(
+            self.angle.cos() * displacement,
+            self.angle.sin() * displacement,
+        )
+    }
+
+    fn try_finish_rotation(&mut self) {
         let mut h = (self.target_angle - self.angle) % REV_ANGLE;
         if h < 0.0 {
             h += REV_ANGLE;
