@@ -6,8 +6,6 @@ use crate::connection::{Op, ServerMsg, Connection, ConnectionState};
 use crate::types::*;
 use crate::consts::*;
 use crate::controller::SnakeController;
-use crate::REV_ANGLE;
-use crate::modulo;
 use std::time::Instant;
 use legion::prelude::*;
 use legion::borrow::RefMut;
@@ -208,37 +206,17 @@ impl<'connection> State<'connection> {
         let query = <(Write<Pos>, Read<Body>, Write<Movement>)>::query();
         for (mut pos, body, mut movement) in query.iter_mut(&mut self.world) {
             let delta_angle = self.params.mamu * vfr * body.scang() * movement.spang(self.params.spangdv) * movement.direction.value();
-            match movement.direction {
-                Direction::None => movement.angle = movement.target_angle,
-                _ => {
-                    movement.angle = modulo(movement.angle + delta_angle, REV_ANGLE);
-                    movement.try_finish_rotation();
-                }
-            }
-
-            let displacement = movement.speed * vfr / 4.0; // TODO: add .min(msl)
-            pos.x += movement.angle.cos() * displacement;
-            pos.y += movement.angle.sin() * displacement;
+            *pos += movement.interpolate(delta_angle, vfr);
         }
     }
 
     fn interpolate_preys(&mut self, vfr: f32) {
-        let prey_base_delta_angle = self.params.prey_mamu * vfr;
+        let base_delta_angle = self.params.prey_mamu * vfr;
         let query = <(Write<Pos>, Write<Movement>)>::query()
             .filter(tag::<PreyTag>());
         for (mut pos, mut movement) in query.iter_mut(&mut self.world) {
-            match movement.direction {
-                Direction::None => movement.angle = movement.target_angle,
-                _ => {
-                    let delta_angle = prey_base_delta_angle * movement.direction.value();
-                    movement.angle = modulo(movement.angle + delta_angle, REV_ANGLE);
-                    movement.try_finish_rotation();
-                }
-            }
-
-            let displacement = movement.speed * vfr / 4.0;
-            pos.x += movement.angle.cos() * displacement;
-            pos.y += movement.angle.sin() * displacement;
+            let delta_angle = base_delta_angle * movement.direction.value();
+            *pos += movement.interpolate(delta_angle, vfr);
         }
     }
 }
