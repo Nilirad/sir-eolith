@@ -34,6 +34,8 @@ pub enum Op {
     PosRel = 'G' as u8,
     /// A snake must be displaced by an offset and a new section must be added.
     GrowRel = 'N' as u8,
+    /// Game stats must be updated.
+    UpdateStats = 'l' as u8,
     /// A snake must lose a section.
     Shrink = 'r' as u8,
     /// Unload all food within a sector.
@@ -147,6 +149,18 @@ impl ServerMsg {
         
         self.i += 3;
         debug_assert!(self.i <= self.data.len());
+        result
+    }
+
+    pub fn read_string(&mut self) -> String {
+        let length = self.read_u8() as usize;
+        let slice = &self.data[self.i .. self.i + length];
+        let result = match std::str::from_utf8(slice) {
+            Ok(str) => str.to_owned(),
+            Err(_) => "".to_owned(),
+        };
+
+        self.i += length;
         result
     }
 
@@ -304,5 +318,21 @@ mod tests {
         let mut m = ServerMsg::new(vec![23, 5, 9, 78, 92, 235, 255, 36]);
         let result = m.read_u24();
         assert_eq!(result, 5135595u32);
+    }
+
+    #[test]
+    fn read_string() {
+        let mut m = ServerMsg::new(vec![0, 0, 0, 5, 72, 101, 108, 108, 111, 255]);
+        let result = m.read_string();
+        assert_eq!(result, String::from("Hello"));
+        assert_eq!(m.read_u8(), 255);
+    }
+
+    #[test]
+    fn read_string_zero_length() {
+        let mut m = ServerMsg::new(vec![0, 0, 0, 0, 72, 101, 108, 108, 111, 255]);
+        let result = m.read_string();
+        assert_eq!(result, String::from(""));
+        assert_eq!(m.read_u8(), 72);
     }
 }

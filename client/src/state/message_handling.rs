@@ -14,7 +14,7 @@ impl<'connection> State<'connection> {
 
     pub fn handle_setup_game(&mut self, mut message: ServerMsg) {
         self.params.world_radius = message.read_u24() as f32;
-        let _mscps = message.read_u16();
+        self.mscps(message.read_u16() as usize);
         self.params.sector_size = message.read_u16() as f32;
         message.skip(2); // `sector_count_along_edge` is unused.
         self.params.spangdv = message.read_u8() as f32 / 10.0;
@@ -25,6 +25,30 @@ impl<'connection> State<'connection> {
         
         info!("Logged into server.");
         self.connection.set_state(ConnectionState::Playing);
+    }
+
+    fn mscps(&mut self, mscps: usize) {
+        for i in 0..=mscps {
+            self.params.fmlts.push(
+                if i < mscps { (1.0 - i as f32 / mscps as f32).powf(2.25) }
+                else { self.params.fmlts.last().copied().unwrap() }
+            );
+
+            self.params.fpsls.push(
+                if i > 0 { 
+                    self.params.fpsls.last().copied().unwrap()
+                        + 1.0 / self.params.fmlts[i - 1]
+                }
+                else { 0.0 }
+            );
+        }
+
+        let last_fmlt = self.params.fmlts.last().copied().unwrap();
+        let last_fpsl = self.params.fpsls.last().copied().unwrap();
+        for _ in 0..2048 {
+            self.params.fmlts.push(last_fmlt);
+            self.params.fpsls.push(last_fpsl);
+        }
     }
 
     pub fn handle_angle(&mut self, mut message: ServerMsg, opcode: Op) {
@@ -226,6 +250,22 @@ impl<'connection> State<'connection> {
         } else {
             warn!("[pos/grow] Snake {} not found.", id);
         }
+    }
+
+    pub fn handle_update_stats(&mut self, mut message: ServerMsg) {
+        message.skip(1); // Your rank in leaderboard, redundant.
+        self.stats.your_rank = Some(message.read_u16());
+        self.stats.player_count = Some(message.read_u16());
+        self.stats.leaderboard.clear();
+        while !message.has_reached_end() {
+            let snake_point_count = message.read_u16() as usize;
+            let fullness = message.read_fullness();
+            let _text_color = message.read_u8() % 9;
+            let nickname = message.read_string();
+            self.stats.leaderboard.push((nickname, self.score(snake_point_count, fullness)))
+        }
+
+        println!("{:?}", self.stats.leaderboard);
     }
 
     pub fn handle_shrink(&mut self, mut message: ServerMsg) {
