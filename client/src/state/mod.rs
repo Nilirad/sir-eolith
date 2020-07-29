@@ -235,14 +235,15 @@ impl<'connection> EventHandler for State<'connection> {
         }
 
         // TODO: Refactor in own function
-        let prey_delta_angle = self.params.prey_mamu * vfr;
+        let prey_base_delta_angle = self.params.prey_mamu * vfr;
         let query = <(Write<Pos>, Write<Movement>)>::query()
             .filter(tag::<PreyTag>());
         for (mut pos, mut movement) in query.iter_mut(&mut self.world) {
             match movement.direction {
                 Direction::None => movement.angle = movement.target_angle,
                 _ => {
-                    movement.angle = modulo(movement.angle + prey_delta_angle, REV_ANGLE);
+                    let delta_angle = prey_base_delta_angle * movement.direction.value();
+                    movement.angle = modulo(movement.angle + delta_angle, REV_ANGLE);
                     if movement.ending_rotation() {
                         movement.angle = movement.target_angle;
                         movement.direction = Direction::None;
