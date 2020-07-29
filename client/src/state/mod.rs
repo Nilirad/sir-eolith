@@ -212,10 +212,7 @@ impl<'connection> State<'connection> {
                 Direction::None => movement.angle = movement.target_angle,
                 _ => {
                     movement.angle = modulo(movement.angle + delta_angle, REV_ANGLE);
-                    if movement.ending_rotation() {
-                        movement.angle = movement.target_angle;
-                        movement.direction = Direction::None;
-                    }
+                    movement.try_finish_rotation();
                 }
             }
 
@@ -235,10 +232,7 @@ impl<'connection> State<'connection> {
                 _ => {
                     let delta_angle = prey_base_delta_angle * movement.direction.value();
                     movement.angle = modulo(movement.angle + delta_angle, REV_ANGLE);
-                    if movement.ending_rotation() {
-                        movement.angle = movement.target_angle;
-                        movement.direction = Direction::None;
-                    }
+                    movement.try_finish_rotation();
                 }
             }
 
