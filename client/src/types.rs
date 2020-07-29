@@ -1,5 +1,5 @@
 use crate::nalgebra_prelude::*;
-use crate::{modulo, REV_ANGLE};
+use crate::REV_ANGLE;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum PlayerType {
@@ -100,21 +100,6 @@ impl Movement {
 
     pub fn spang(&self, spangdv: f32) -> f32 {
         (self.speed / spangdv).min(1.0)
-    }
-
-    // TODO: This kind of behavior inside a component looks kinda inappropriate...
-    pub fn update_angle(&mut self, mamu: f32, vfr: f32, scang: f32, spangdv: f32) {
-        let delta_angle = mamu * vfr * scang * self.spang(spangdv) * self.direction.value();
-        match self.direction {
-            Direction::None => self.angle = self.target_angle,
-            _ => {
-                self.angle = modulo(self.angle + delta_angle, REV_ANGLE);
-                if self.ending_rotation() {
-                    self.angle = self.target_angle;
-                    self.direction = Direction::None;
-                }
-            }
-        }
     }
 
     // TODO: Don't just return a bool, do the thing itself! Don't let client code do the work
