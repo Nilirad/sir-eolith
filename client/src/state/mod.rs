@@ -86,6 +86,13 @@ impl Default for Params {
     }
 }
 
+#[derive(Default)]
+struct Stats {
+    your_rank: Option<u16>,
+    player_count: Option<u16>,
+    leaderboard: Vec<(String, u32)>,
+}
+
 pub struct State<'connection> {
     connection: &'connection mut dyn Connection,
     world: World,
@@ -95,6 +102,7 @@ pub struct State<'connection> {
     player_set: bool,
     zoom: Zoom,
     params: Params,
+    stats: Stats,
 }
 
 impl<'connection> State<'connection> {
@@ -108,6 +116,7 @@ impl<'connection> State<'connection> {
             player_set: false,
             zoom: Zoom::new(),
             params: Params::default(),
+            stats: Stats::default(),
         }
     }
 
