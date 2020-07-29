@@ -207,7 +207,17 @@ impl<'connection> State<'connection> {
     fn interpolate_snakes(&mut self, vfr: f32) {
         let query = <(Write<Pos>, Read<Body>, Write<Movement>)>::query();
         for (mut pos, body, mut movement) in query.iter_mut(&mut self.world) {
-            movement.update_angle(self.params.mamu, vfr, body.scang(), self.params.spangdv);
+            let delta_angle = self.params.mamu * vfr * body.scang() * movement.spang(self.params.spangdv) * movement.direction.value();
+            match movement.direction {
+                Direction::None => movement.angle = movement.target_angle,
+                _ => {
+                    movement.angle = modulo(movement.angle + delta_angle, REV_ANGLE);
+                    if movement.ending_rotation() {
+                        movement.angle = movement.target_angle;
+                        movement.direction = Direction::None;
+                    }
+                }
+            }
 
             let displacement = movement.speed * vfr / 4.0; // TODO: add .min(msl)
             pos.x += movement.angle.cos() * displacement;
