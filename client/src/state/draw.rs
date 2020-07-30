@@ -173,14 +173,11 @@ impl<'connection> State<'connection> {
 
     fn draw_leaderboard(&mut self, ctx: &mut Context) -> GameResult {
         const OFFSET: f32 = 20.0;
-        for (i, text) in self.stats.leaderboard.iter().enumerate() {
-            graphics::queue_text(
-                ctx,
-                text,
-                na::Point2::new(20.0, 20.0 + i as f32 * OFFSET),
-                Some(graphics::WHITE),
-            );
-
+        for (i, (rank, nickname, score)) in self.stats.leaderboard.iter().enumerate() {
+            let y = 20.0 + i as f32 * OFFSET;
+            graphics::queue_text(ctx, rank, na::Point2::new(20.0, y), None);
+            graphics::queue_text(ctx, nickname, na::Point2::new(60.0, y), None);
+            graphics::queue_text(ctx, score, na::Point2::new(360.0, y), None);
         }
 
         graphics::draw_queued_text(
