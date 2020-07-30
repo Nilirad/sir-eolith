@@ -262,10 +262,8 @@ impl<'connection> State<'connection> {
             let fullness = message.read_fullness();
             let _text_color = message.read_u8() % 9;
             let nickname = message.read_string();
-            self.stats.leaderboard.push((nickname, self.score(snake_point_count, fullness)))
+            self.stats.add_to_leaderboard(nickname, self.score(snake_point_count, fullness));
         }
-
-        println!("{:?}", self.stats.leaderboard);
     }
 
     pub fn handle_shrink(&mut self, mut message: ServerMsg) {

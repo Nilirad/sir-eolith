@@ -20,6 +20,7 @@ pub mod ggez_prelude {
             Mesh,
             MeshBuilder,
             Rect,
+            Text,
         },
         nalgebra as na,
     };

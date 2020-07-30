@@ -94,7 +94,17 @@ impl Default for Params {
 struct Stats {
     your_rank: Option<u16>,
     player_count: Option<u16>,
-    leaderboard: Vec<(String, u32)>,
+    leaderboard: Vec<Text>,
+}
+
+impl Stats {
+    pub fn add_to_leaderboard(&mut self, nickname: String, score: u32) {
+        let mut text = Text::default();
+        text.add(nickname);
+        text.add(score.to_string());
+        
+        self.leaderboard.push(text);
+    }
 }
 
 pub struct State<'connection> {
