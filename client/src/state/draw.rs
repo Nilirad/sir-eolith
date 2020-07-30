@@ -17,9 +17,15 @@ impl<'connection> State<'connection> {
         graphics::draw(ctx, &mesh, (na::Point2::new(0.0, 0.0),))?;
         
         self.screen_coords(ctx)?;
-        self.draw_leaderboard(ctx)?;
-
-        Ok(())
+        self.draw_leaderboard(ctx);
+        self.draw_score(ctx);
+        self.draw_rank(ctx);
+        graphics::draw_queued_text(
+            ctx,
+            graphics::DrawParam::default(),
+            None,
+            graphics::FilterMode::Linear,
+        )
     }
 
     #[allow(unused_assignments)]
@@ -171,7 +177,7 @@ impl<'connection> State<'connection> {
         }
     }
 
-    fn draw_leaderboard(&mut self, ctx: &mut Context) -> GameResult {
+    fn draw_leaderboard(&mut self, ctx: &mut Context) {
         const OFFSET: f32 = 20.0;
         for (i, (rank, nickname, score)) in self.stats.leaderboard.iter().enumerate() {
             let y = 20.0 + i as f32 * OFFSET;
@@ -179,15 +185,24 @@ impl<'connection> State<'connection> {
             graphics::queue_text(ctx, nickname, na::Point2::new(60.0, y), None);
             graphics::queue_text(ctx, score, na::Point2::new(360.0, y), None);
         }
+    }
 
-        graphics::draw_queued_text(
+    fn draw_score(&mut self, ctx: &mut Context) {
+        graphics::queue_text(
             ctx,
-            graphics::DrawParam::default(),
+            &self.stats.score_text,
+            na::Point2::new(20.0, WINDOW_HEIGHT - 50.0),
             None,
-            graphics::FilterMode::Linear,
-        )?;
-        
-        Ok(())
+        );
+    }
+
+    fn draw_rank(&mut self, ctx: &mut Context) {
+        graphics::queue_text(
+            ctx,
+            &self.stats.rank_text,
+            na::Point2::new(20.0, WINDOW_HEIGHT - 30.0),
+            None,
+        );
     }
     
     /// Updates the viewport, centering it to the player's snake's head.

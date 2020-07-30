@@ -90,11 +90,22 @@ impl Default for Params {
     }
 }
 
-#[derive(Default)]
 struct Stats {
-    your_rank: Option<u16>,
-    player_count: Option<u16>,
+    rank_text: Text,
     leaderboard: Vec<(Text, Text, Text)>,
+    score: u32,
+    score_text: Text,
+}
+
+impl Default for Stats {
+    fn default() -> Self {
+        Self {
+            rank_text: Text::new("Your rank:"),
+            leaderboard: Vec::new(),
+            score: u32::default(),
+            score_text: Text::new("Score:"),
+        }
+    }
 }
 
 impl Stats {
@@ -104,6 +115,15 @@ impl Stats {
         let score_text = Text::new(score.to_string());
         
         self.leaderboard.push((position_text, name_text, score_text));
+    }
+
+    pub fn update_rank(&mut self, your_rank: u16, player_count: u16) {
+        self.rank_text = Text::new(format!("Your rank: {} / {}", your_rank, player_count));
+    }
+
+    pub fn update_score(&mut self, score: u32) {
+        self.score = score;
+        self.score_text = Text::new(format!("Score: {}", score));
     }
 }
 
@@ -272,6 +292,17 @@ impl<'connection> EventHandler for State<'connection> {
 
         self.interpolate_snakes(vfr);
         self.interpolate_preys(vfr);
+
+        // TODO: PLAYER SCORE (refactor!)
+        let query = <(Read<Body>,)>::query()
+            .filter(tag_value(&PlayerTag(PlayerType::You)));
+        for (body,) in query.iter(&self.world) {
+            let score = self.score(body.points.len(), body.fullness);
+            if score != self.stats.score {
+                self.stats.update_score(score);
+            }
+        }
+        
 
         Ok(())
     }
