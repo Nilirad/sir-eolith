@@ -94,16 +94,16 @@ impl Default for Params {
 struct Stats {
     your_rank: Option<u16>,
     player_count: Option<u16>,
-    leaderboard: Vec<Text>,
+    leaderboard: Vec<(Text, Text, Text)>,
 }
 
 impl Stats {
     pub fn add_to_leaderboard(&mut self, nickname: String, score: u32) {
-        let mut text = Text::default();
-        text.add(nickname);
-        text.add(score.to_string());
+        let position_text = Text::new(format!("{}.", (self.leaderboard.len() + 1)));
+        let name_text = Text::new(nickname);
+        let score_text = Text::new(score.to_string());
         
-        self.leaderboard.push(text);
+        self.leaderboard.push((position_text, name_text, score_text));
     }
 }
 
