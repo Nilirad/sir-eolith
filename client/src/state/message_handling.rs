@@ -254,8 +254,9 @@ impl<'connection> State<'connection> {
 
     pub fn handle_update_stats(&mut self, mut message: ServerMsg) {
         message.skip(1); // Your rank in leaderboard, redundant.
-        self.stats.your_rank = Some(message.read_u16());
-        self.stats.player_count = Some(message.read_u16());
+        let your_rank = message.read_u16();
+        let player_count = message.read_u16();
+        self.stats.update_rank(your_rank, player_count);
         self.stats.leaderboard.clear();
         while !message.has_reached_end() {
             let snake_point_count = message.read_u16() as usize;
