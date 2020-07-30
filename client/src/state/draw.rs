@@ -7,17 +7,17 @@ use legion::prelude::*;
 impl<'connection> State<'connection> {
     /// Draws the gameplay elements.
     pub fn draw_game(&mut self, ctx: &mut Context) -> GameResult {
-        self.update_viewport(ctx)?;
-
+        self.player_coords(ctx)?;
         let mut mesh_builder = MeshBuilder::new();
-
         self.draw_border(&mut mesh_builder);
         self.draw_food(&mut mesh_builder);
         self.draw_preys(&mut mesh_builder);
         self.draw_snakes(&mut mesh_builder)?;
-
         let mesh = mesh_builder.build(ctx)?;
         graphics::draw(ctx, &mesh, (na::Point2::new(0.0, 0.0),))?;
+        
+        self.screen_coords(ctx)?;
+        self.draw_leaderboard(ctx)?;
 
         Ok(())
     }
@@ -170,9 +170,31 @@ impl<'connection> State<'connection> {
             ).unwrap(); */
         }
     }
+
+    fn draw_leaderboard(&mut self, ctx: &mut Context) -> GameResult {
+        const OFFSET: f32 = 20.0;
+        for (i, text) in self.stats.leaderboard.iter().enumerate() {
+            graphics::queue_text(
+                ctx,
+                text,
+                na::Point2::new(20.0, 20.0 + i as f32 * OFFSET),
+                Some(graphics::WHITE),
+            );
+
+        }
+
+        graphics::draw_queued_text(
+            ctx,
+            graphics::DrawParam::default(),
+            None,
+            graphics::FilterMode::Linear,
+        )?;
+        
+        Ok(())
+    }
     
     /// Updates the viewport, centering it to the player's snake's head.
-    fn update_viewport(&mut self, ctx: &mut Context) -> GameResult {
+    fn player_coords(&mut self, ctx: &mut Context) -> GameResult {
         let query = <(Read<Pos>, Read<Body>)>::query()
             .filter(tag_value(&PlayerTag(PlayerType::You)));
         
@@ -187,5 +209,16 @@ impl<'connection> State<'connection> {
             graphics::set_screen_coordinates(ctx, viewport)?;
         }
         Ok(())
+    }
+
+    fn screen_coords(&mut self, ctx: &mut Context) -> GameResult {
+        let viewport = graphics::Rect {
+            x: 0.0,
+            y: 0.0,
+            w: WINDOW_WIDTH,
+            h: WINDOW_HEIGHT,
+        };
+
+        graphics::set_screen_coordinates(ctx, viewport)
     }
 }
