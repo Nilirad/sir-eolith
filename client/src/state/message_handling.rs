@@ -208,7 +208,7 @@ impl<'connection> State<'connection> {
     }
 
     pub fn handle_update_minimap(&mut self, mut message: ServerMsg) {
-        const MASKS: [u8; 7] = [
+        /* const MASKS: [u8; 7] = [
             0b1000000,
             0b0100000,
             0b0010000,
@@ -216,21 +216,24 @@ impl<'connection> State<'connection> {
             0b0000100,
             0b0000010,
             0b0000001,
-        ];
-        const MAP_SIDE: u32 = 80;
-        const MAP_AREA: u32 = MAP_SIDE * MAP_SIDE;
+        ]; */
 
-        let mut pen_position = 0u32;
-        while !message.has_reached_end() && pen_position < MAP_AREA {
+        self.stats.clear_minimap();
+        //let mut pen_position = 0;
+        while !message.has_reached_end() /* && pen_position < MINIMAP_AREA */ {
             let byte = message.read_u8();
             if byte >= 128 {
-                pen_position += (byte - 128) as u32;
+                let count = (byte - 128) as usize;
+                self.stats.set_minimap_empty_pixels(count)
+                //pen_position += (byte - 128) as usize;
             } else {
-                for mask in MASKS.iter() {
+                self.stats.set_minimap_pixels(byte);
+                /* for mask in MASKS.iter() {
                     if (byte & *mask) > 0 {
-                        // set pixel
+                        self.stats.set_minimap_pixel(pen_position);
                     }
-                } 
+                    pen_position += 1;
+                } */
             }
         }
     }
