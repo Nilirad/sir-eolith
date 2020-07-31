@@ -34,6 +34,8 @@ pub mod nalgebra_prelude {
 mod consts {
     pub const WINDOW_WIDTH: f32 = 1280.0; // TODO: Remove these. Retrieve dynamically.
     pub const WINDOW_HEIGHT: f32 = 720.0;
+    pub const MINIMAP_SIDE: usize = 80;
+    pub const MINIMAP_AREA: usize = MINIMAP_SIDE * MINIMAP_SIDE;
 }
 
 pub use state::State;

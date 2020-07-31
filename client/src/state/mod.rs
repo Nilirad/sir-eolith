@@ -9,6 +9,7 @@ use crate::controller::SnakeController;
 use std::time::Instant;
 use legion::prelude::*;
 use legion::borrow::RefMut;
+use bit_vec::BitVec;
 
 struct Ping {
     waiting_response: bool,
@@ -95,6 +96,7 @@ struct Stats {
     leaderboard: Vec<(Text, Text, Text)>,
     score: u32,
     score_text: Text,
+    minimap_data: BitVec,
 }
 
 impl Default for Stats {
@@ -104,6 +106,7 @@ impl Default for Stats {
             leaderboard: Vec::new(),
             score: u32::default(),
             score_text: Text::new("Score:"),
+            minimap_data: BitVec::with_capacity(MINIMAP_AREA),
         }
     }
 }
@@ -124,6 +127,20 @@ impl Stats {
     pub fn update_score(&mut self, score: u32) {
         self.score = score;
         self.score_text = Text::new(format!("Score: {}", score));
+    }
+
+    pub fn clear_minimap(&mut self) {
+        self.minimap_data.clear();
+    }
+
+    pub fn set_minimap_empty_pixels(&mut self, count: usize) {
+        let mut pixels = BitVec::from_elem(count, false);
+        self.minimap_data.append(&mut pixels);
+    }
+
+    pub fn set_minimap_pixels(&mut self, byte: u8) {
+        let mut pixels = BitVec::from_bytes(&[byte]);
+        self.minimap_data.append(&mut pixels);
     }
 }
 
