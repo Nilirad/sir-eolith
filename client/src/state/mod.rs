@@ -165,6 +165,7 @@ impl<'connection> State<'connection> {
                 Op::UpdateFullness => self.handle_update_fullness(message),
                 Op::SnakeAction => self.handle_snake_action(message),
                 Op::PingResponse => self.handle_ping_response(),
+                Op::UpdateMinimap => self.handle_update_minimap(message),
                 Op::PosAbs | Op::GrowAbs | Op::PosRel | Op::GrowRel
                     => self.handle_positioning_and_growth(message),
                 Op::UpdateStats => self.handle_update_stats(message),
