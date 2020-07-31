@@ -26,6 +26,8 @@ pub enum Op {
     SnakeAction = 's' as u8,
     /// Response to client ping
     PingResponse = 'p' as u8,
+    /// The minimap must be updated.
+    UpdateMinimap = 'u' as u8,
     /// A snake must be moved to a new location.
     PosAbs = 'g' as u8,
     /// A snake must be moved to a new location and a new section must be added.

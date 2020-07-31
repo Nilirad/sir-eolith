@@ -207,6 +207,34 @@ impl<'connection> State<'connection> {
         trace!("Pong");
     }
 
+    pub fn handle_update_minimap(&mut self, mut message: ServerMsg) {
+        const MASKS: [u8; 7] = [
+            0b1000000,
+            0b0100000,
+            0b0010000,
+            0b0001000,
+            0b0000100,
+            0b0000010,
+            0b0000001,
+        ];
+        const MAP_SIDE: u32 = 80;
+        const MAP_AREA: u32 = MAP_SIDE * MAP_SIDE;
+
+        let mut pen_position = 0u32;
+        while !message.has_reached_end() && pen_position < MAP_AREA {
+            let byte = message.read_u8();
+            if byte >= 128 {
+                pen_position += (byte - 128) as u32;
+            } else {
+                for mask in MASKS.iter() {
+                    if (byte & *mask) > 0 {
+                        // set pixel
+                    }
+                } 
+            }
+        }
+    }
+
     pub fn handle_positioning_and_growth(&mut self, mut message: ServerMsg) {
         let growing = message.opcode() == Ok(Op::GrowAbs) || message.opcode() == Ok(Op::GrowRel);
         let absolute = message.opcode() == Ok(Op::PosAbs) || message.opcode() == Ok(Op::GrowAbs);
