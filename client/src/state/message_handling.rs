@@ -171,10 +171,10 @@ impl<'connection> State<'connection> {
 
                 let movement = Movement::new(speed, angle, target_angle, Direction::None);
 
-                let tag = if self.player_set {
+                let tag = if self.player_metadata.set {
                     PlayerTag(PlayerType::Other)
                 } else {
-                    self.player_set = true; // TODO: This side effect is not the best thing...
+                    self.player_metadata.set = true; // TODO: This side effect is not the best thing...
                     PlayerTag(PlayerType::You)
                 };
 

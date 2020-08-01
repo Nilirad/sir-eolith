@@ -91,6 +91,22 @@ impl Default for Params {
     }
 }
 
+struct PlayerMetadata {
+    set: bool,
+    pos: Pos,
+    body_length: f32,
+}
+
+impl Default for PlayerMetadata {
+    fn default() -> Self {
+        Self {
+            set: false,
+            pos: Pos::new(0.0, 0.0),
+            body_length: 2.0,
+        }
+    }
+}
+
 struct Stats {
     rank_text: Text,
     leaderboard: Vec<(Text, Text, Text)>,
@@ -145,9 +161,7 @@ pub struct State<'connection> {
     controller: SnakeController,
     ping_status: Ping,
     last_update: Instant,
-    player_set: bool,
-    player_pos: Pos,
-    player_body_length: f32,
+    player_metadata: PlayerMetadata,
     zoom: Zoom,
     params: Params,
     stats: Stats,
@@ -161,9 +175,7 @@ impl<'connection> State<'connection> {
             controller: SnakeController::new(),
             ping_status: Ping::new(false),
             last_update: Instant::now(),
-            player_set: false,
-            player_pos: Pos::new(0.0, 0.0),
-            player_body_length: 2.0,
+            player_metadata: PlayerMetadata::default(),
             zoom: Zoom::new(),
             params: Params::default(),
             stats: Stats::default(),
