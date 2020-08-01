@@ -17,6 +17,7 @@ impl<'connection> State<'connection> {
         graphics::draw(ctx, &mesh, (na::Point2::new(0.0, 0.0),))?;
         
         self.screen_coords(ctx)?;
+        self.draw_minimap(ctx)?;
         self.draw_leaderboard(ctx);
         self.draw_score(ctx);
         self.draw_rank(ctx);
@@ -203,6 +204,33 @@ impl<'connection> State<'connection> {
             na::Point2::new(20.0, WINDOW_HEIGHT - 30.0),
             None,
         );
+    }
+
+    fn draw_minimap(&mut self, ctx: &mut Context) -> GameResult {
+        let mut minimap_mesh_builder = MeshBuilder::new();
+        for (i, flag) in self.stats.minimap_data.iter().enumerate() {
+            if flag {
+                let x = (i % MINIMAP_SIDE) as f32;
+                let y = (i / MINIMAP_SIDE) as f32;
+
+                let pixel_rect = Rect::new(x, y, 1.0, 1.0);
+                minimap_mesh_builder.rectangle(
+                    graphics::DrawMode::fill(),
+                    pixel_rect,
+                    graphics::WHITE,
+                );
+            }
+        }
+
+        if let Ok(ref minimap) = minimap_mesh_builder.build(ctx) {
+            graphics::draw(
+                ctx,
+                minimap,
+                (na::Point2::new(0.0, 0.0),),
+            )?;
+        }
+
+        Ok(())
     }
     
     /// Updates the viewport, centering it to the player's snake's head.

@@ -106,7 +106,7 @@ impl Default for Stats {
             leaderboard: Vec::new(),
             score: u32::default(),
             score_text: Text::new("Score:"),
-            minimap_data: BitVec::with_capacity(MINIMAP_AREA),
+            minimap_data: BitVec::from_elem(MINIMAP_AREA, false),
         }
     }
 }
@@ -130,17 +130,12 @@ impl Stats {
     }
 
     pub fn clear_minimap(&mut self) {
-        self.minimap_data.clear();
+        self.minimap_data.set_all();
+        self.minimap_data.negate();
     }
 
-    pub fn set_minimap_empty_pixels(&mut self, count: usize) {
-        let mut pixels = BitVec::from_elem(count, false);
-        self.minimap_data.append(&mut pixels);
-    }
-
-    pub fn set_minimap_pixels(&mut self, byte: u8) {
-        let mut pixels = BitVec::from_bytes(&[byte]);
-        self.minimap_data.append(&mut pixels);
+    pub fn set_minimap_pixel(&mut self, pen_position: usize) {
+        self.minimap_data.set(pen_position, true);
     }
 }
 
