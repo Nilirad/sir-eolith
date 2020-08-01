@@ -282,17 +282,20 @@ impl<'connection> State<'connection> {
     fn player_coords(&mut self, ctx: &mut Context) -> GameResult {
         let query = <(Read<Pos>, Read<Body>)>::query()
             .filter(tag_value(&PlayerTag(PlayerType::You)));
-        
         for (pos, body) in query.iter(&mut self.world) {
-            let scale = 1.0 / self.zoom.factor(body.length());
-            let viewport = graphics::Rect {
-                x: pos.x - (scale * WINDOW_WIDTH / 2.0),
-                y: pos.y - (scale * WINDOW_HEIGHT / 2.0),
-                w: scale * WINDOW_WIDTH,
-                h: scale * WINDOW_HEIGHT,
-            };
-            graphics::set_screen_coordinates(ctx, viewport)?;
+            self.player_pos = *pos;
+            self.player_body_length = body.length();
         }
+
+        let scale = 1.0 / self.zoom.factor(self.player_body_length);
+        let viewport = graphics::Rect {
+            x: self.player_pos.x - (scale * WINDOW_WIDTH / 2.0),
+            y: self.player_pos.y - (scale * WINDOW_HEIGHT / 2.0),
+            w: scale * WINDOW_WIDTH,
+            h: scale * WINDOW_HEIGHT,
+        };
+        graphics::set_screen_coordinates(ctx, viewport)?;
+
         Ok(())
     }
 
