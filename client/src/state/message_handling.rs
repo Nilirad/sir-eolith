@@ -208,32 +208,21 @@ impl<'connection> State<'connection> {
     }
 
     pub fn handle_update_minimap(&mut self, mut message: ServerMsg) {
-        /* const MASKS: [u8; 7] = [
-            0b1000000,
-            0b0100000,
-            0b0010000,
-            0b0001000,
-            0b0000100,
-            0b0000010,
-            0b0000001,
-        ]; */
-
         self.stats.clear_minimap();
-        //let mut pen_position = 0;
-        while !message.has_reached_end() /* && pen_position < MINIMAP_AREA */ {
+        let mut pen_position = 0;
+        while !message.has_reached_end() && pen_position < crate::consts::MINIMAP_AREA {
             let byte = message.read_u8();
             if byte >= 128 {
-                let count = (byte - 128) as usize;
-                self.stats.set_minimap_empty_pixels(count)
-                //pen_position += (byte - 128) as usize;
+                pen_position += (byte - 128) as usize;
             } else {
-                self.stats.set_minimap_pixels(byte);
-                /* for mask in MASKS.iter() {
-                    if (byte & *mask) > 0 {
+                let mut mask = 0b_0100_0000_u8;
+                while mask > 0b_0000_0000 {
+                    if (byte & mask) > 0 {
                         self.stats.set_minimap_pixel(pen_position);
                     }
                     pen_position += 1;
-                } */
+                    mask >>= 1;
+                }
             }
         }
     }
