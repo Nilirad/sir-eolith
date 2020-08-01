@@ -208,6 +208,23 @@ impl<'connection> State<'connection> {
 
     fn draw_minimap(&mut self, ctx: &mut Context) -> GameResult {
         let mut minimap_mesh_builder = MeshBuilder::new();
+
+        const MINIMAP_RADIUS: f32 = MINIMAP_SIDE as f32 / 2.0;
+        minimap_mesh_builder.circle(
+            graphics::DrawMode::fill(),
+            na::Point2::new(MINIMAP_RADIUS, MINIMAP_RADIUS),
+            MINIMAP_RADIUS + 3.0,
+            0.01,
+            graphics::BLACK,
+        );
+        minimap_mesh_builder.circle(
+            graphics::DrawMode::fill(),
+            na::Point2::new(MINIMAP_RADIUS, MINIMAP_RADIUS),
+            MINIMAP_RADIUS,
+            0.01,
+            Color::new(0.4, 0.4, 0.4, 1.0),
+        );
+
         for (i, flag) in self.stats.minimap_data.iter().enumerate() {
             if flag {
                 let x = (i % MINIMAP_SIDE) as f32;
@@ -222,11 +239,39 @@ impl<'connection> State<'connection> {
             }
         }
 
+        let query = <(Read<Pos>,)>::query()
+            .filter(tag_value(&PlayerTag(PlayerType::You)));
+        for (pos,) in query.iter(&self.world) {
+            let point = na::Point2::new(
+                pos.x * MINIMAP_SIDE as f32 / (2.0 * self.params.world_radius),
+                pos.y * MINIMAP_SIDE as f32 / (2.0 * self.params.world_radius),
+            );
+            minimap_mesh_builder.circle(
+                graphics::DrawMode::fill(),
+                point,
+                4.0,
+                1.0,
+                graphics::BLACK,
+            );
+            minimap_mesh_builder.circle(
+                graphics::DrawMode::fill(),
+                point,
+                2.0,
+                1.0,
+                Color::new(1.0, 1.0, 1.0, 1.0),
+            );
+        }
+
         if let Ok(ref minimap) = minimap_mesh_builder.build(ctx) {
             graphics::draw(
                 ctx,
                 minimap,
-                (na::Point2::new(0.0, 0.0),),
+                (
+                    na::Point2::new(
+                        WINDOW_WIDTH - MINIMAP_SIDE as f32 - 20.0,
+                        WINDOW_HEIGHT - MINIMAP_SIDE as f32 - 20.0,
+                    ),
+                ),
             )?;
         }
 

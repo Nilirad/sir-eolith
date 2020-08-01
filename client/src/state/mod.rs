@@ -368,6 +368,7 @@ impl<'connection> EventHandler for State<'connection> {
         ) {
         match keycode {
             KeyCode::Z => self.zoom.0 = None,
+            KeyCode::A => println!("fps: {}", ggez::timer::fps(_ctx)),
             _ => (),
         }
     }
