@@ -21,6 +21,8 @@ pub mod ggez_prelude {
             MeshBuilder,
             Rect,
             Text,
+            TextFragment,
+            Scale,
         },
         nalgebra as na,
     };

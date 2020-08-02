@@ -158,6 +158,75 @@ impl Stats {
     }
 }
 
+struct DebugInfo {
+    x: Text,
+    y: Text,
+    server_ip: Text,
+    ping: Text,
+    fps: Text,
+}
+
+impl DebugInfo {
+    pub fn pos(&mut self, pos: Pos) {
+        self.x.fragments_mut()[1].text = format!("{:.2}", pos.x);
+        self.y.fragments_mut()[1].text = format!("{:.2}", pos.y);
+    }
+
+    pub fn server_ip(&mut self, server_ip: String) {
+        self.server_ip.fragments_mut()[1].text = server_ip;
+    }
+
+    pub fn ping(&mut self, ping: f32) {
+        self.ping.fragments_mut()[1].text = ping.to_string();
+    }
+
+    pub fn fps(&mut self, fps: f64) {
+        self.fps.fragments_mut()[1].text = format!("{:.2}", fps);
+    }
+}
+
+impl Default for DebugInfo {
+    fn default() -> Self {
+        let mut x = Text::new("x: ");
+        let mut y = Text::new("y: ");
+        let mut server_ip = Text::new("server: ");
+        let mut ping = Text::new("ping: ");
+        let mut fps = Text::new("fps: ");
+        x.add("");
+        y.add("");
+        server_ip.add("");
+        ping.add("");
+        fps.add("");
+
+        let scale = Scale::uniform(10.0);
+
+        for f in x.fragments_mut().iter_mut() {
+            f.scale = Some(scale);
+        }
+        for f in y.fragments_mut().iter_mut() {
+            f.scale = Some(scale);
+        }
+        for f in server_ip.fragments_mut().iter_mut() {
+            f.scale = Some(scale);
+        }
+        for f in ping.fragments_mut().iter_mut() {
+            f.scale = Some(scale);
+        }
+        for f in fps.fragments_mut().iter_mut() {
+            f.scale = Some(scale);
+        }
+
+
+        Self {
+            x,
+            y,
+            server_ip,
+            ping,
+            fps,
+        }
+    }
+}
+
 pub struct State<'connection> {
     connection: &'connection mut dyn Connection,
     world: World,
@@ -168,6 +237,7 @@ pub struct State<'connection> {
     zoom: Zoom,
     params: Params,
     stats: Stats,
+    debug_info: DebugInfo,
 }
 
 impl<'connection> State<'connection> {
@@ -182,6 +252,7 @@ impl<'connection> State<'connection> {
             zoom: Zoom::new(),
             params: Params::default(),
             stats: Stats::default(),
+            debug_info: DebugInfo::default(),
         }
     }
 
