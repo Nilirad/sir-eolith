@@ -283,14 +283,14 @@ impl<'connection> State<'connection> {
         let query = <(Read<Pos>, Read<Body>)>::query()
             .filter(tag_value(&PlayerTag(PlayerType::You)));
         for (pos, body) in query.iter(&mut self.world) {
-            self.player_metadata.pos = *pos;
-            self.player_metadata.body_length = body.length();
+            self.player_metadata.player_pos = *pos;
+            self.player_metadata.player_body_length = body.length();
         }
 
-        let scale = 1.0 / self.zoom.factor(self.player_metadata.body_length);
+        let scale = 1.0 / self.zoom.factor(self.player_metadata.player_body_length);
         let viewport = graphics::Rect {
-            x: self.player_metadata.pos.x - (scale * WINDOW_WIDTH / 2.0),
-            y: self.player_metadata.pos.y - (scale * WINDOW_HEIGHT / 2.0),
+            x: self.player_metadata.player_pos.x - (scale * WINDOW_WIDTH / 2.0),
+            y: self.player_metadata.player_pos.y - (scale * WINDOW_HEIGHT / 2.0),
             w: scale * WINDOW_WIDTH,
             h: scale * WINDOW_HEIGHT,
         };
