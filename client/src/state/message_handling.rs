@@ -6,7 +6,7 @@ use legion::prelude::*;
 
 impl<'connection> State<'connection> {
     pub fn handle_login_info(&mut self, message: ServerMsg) {
-        const PROVISIONAL_LGBA_MSG: [u8; 4] = [115, 10, 0, 0];
+        const PROVISIONAL_LGBA_MSG: [u8; 7] = [115, 10, 0, 3, 'b' as u8, 'o' as u8, 'i' as u8];
 
         self.connection.send(decrypt_message(message));
         self.connection.send(PROVISIONAL_LGBA_MSG.to_vec());
