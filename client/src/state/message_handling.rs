@@ -149,14 +149,17 @@ impl<'connection> State<'connection> {
                 message.go_to(18);
                 let pos = message.read_pos_6_bytes();
                 
-                let nickname_length = message.read_u8();
+                /* let nickname_length = message.read_u8();
                 let _nickname = if nickname_length > 0 {
                     let nick = "TODO".to_owned();
                     message.skip(nickname_length as usize);
                     nick
                 } else {
                     "".to_owned()
-                };
+                }; */
+                let nickname = message.read_string();
+                println!("{}: {}", id, nickname);
+                
 
                 let skin_data_length = message.read_u8();
                 let _skin_data = if skin_data_length > 0 {
@@ -183,6 +186,7 @@ impl<'connection> State<'connection> {
                     vec![(
                         (
                             id,
+                            nickname,
                             pos,
                             body,
                             movement,
