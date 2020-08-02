@@ -164,7 +164,7 @@ pub struct State<'connection> {
     controller: SnakeController,
     ping_status: Ping,
     last_update: Instant,
-    player_metadata: Cache,
+    cache: Cache,
     zoom: Zoom,
     params: Params,
     stats: Stats,
@@ -178,7 +178,7 @@ impl<'connection> State<'connection> {
             controller: SnakeController::new(),
             ping_status: Ping::new(false),
             last_update: Instant::now(),
-            player_metadata: Cache::default(),
+            cache: Cache::default(),
             zoom: Zoom::new(),
             params: Params::default(),
             stats: Stats::default(),
@@ -363,14 +363,14 @@ impl<'connection> EventHandler for State<'connection> {
 
     fn mouse_wheel_event(&mut self, _ctx: &mut Context, _x: f32, y: f32) {
         self.zoom.0 = match self.zoom.0 {
-            Some(factor) => Some((factor + 0.1 * y).max(0.3).min(2.0)),
+            Some(factor) => Some((factor + 0.1 * y).max(0.2).min(2.0)),
             None => {
                 let query = <(Read<Body>,)>::query()
                     .filter(tag_value(&PlayerTag(PlayerType::You)));
                     let mut result = None;
                     for (body,) in query.iter(&mut self.world) {
                         let cur_zoom = self.zoom.factor(body.length());
-                        result = Some((cur_zoom + 0.1 * y).min(0.5));
+                        result = Some((cur_zoom + 0.1 * y).max(0.2).min(2.0));
                     }
 
                     result

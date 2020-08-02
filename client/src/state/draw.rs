@@ -12,9 +12,10 @@ impl<'connection> State<'connection> {
         self.draw_border(&mut mesh_builder);
         self.draw_food(&mut mesh_builder);
         self.draw_preys(&mut mesh_builder);
-        self.draw_snakes(&mut mesh_builder)?;
+        self.draw_snakes(&mut mesh_builder, ctx)?;
         let mesh = mesh_builder.build(ctx)?;
         graphics::draw(ctx, &mesh, (na::Point2::new(0.0, 0.0),))?;
+        self.draw_nicknames(ctx)?;
         
         self.screen_coords(ctx)?;
         self.draw_minimap(ctx)?;
@@ -41,7 +42,7 @@ impl<'connection> State<'connection> {
     }
 
     /// Draws the snakes.
-    fn draw_snakes(&mut self, mut mesh_builder: &mut MeshBuilder) -> GameResult {
+    fn draw_snakes(&mut self, mut mesh_builder: &mut MeshBuilder, ctx: &mut Context) -> GameResult {
         let query = <(Read<Id>, Read<Pos>, Read<Body>)>::query();
         for (id, pos, body) in query.iter(&mut self.world) {
             // TODO: Wrap in function `color_from_id()`
@@ -73,6 +74,15 @@ impl<'connection> State<'connection> {
                 0.1,
                 Color::new(0.0, 0.5, 0.0, 1.0),
             );
+
+            if let Some(nickname) = self.cache.nicknames.get(&id) {
+                graphics::queue_text(
+                    ctx,
+                    nickname,
+                    na::Point::from(*pos),
+                    Some(graphics::BLACK),
+                );
+            }
 
             /* let ang_line = vec![
                 ggez::mint::Point2 {x: pos.x, y: pos.y},
@@ -110,6 +120,15 @@ impl<'connection> State<'connection> {
         }
 
         Ok(())
+    }
+
+    fn draw_nicknames(&mut self, ctx: &mut Context) -> GameResult {
+        graphics::draw_queued_text(
+            ctx,
+            (na::Point2::new(0.0, 0.0),),
+            None,
+            graphics::FilterMode::Linear,
+        )
     }
 
     fn draw_food(&mut self, mut mesh_builder: &mut MeshBuilder) {
@@ -283,14 +302,14 @@ impl<'connection> State<'connection> {
         let query = <(Read<Pos>, Read<Body>)>::query()
             .filter(tag_value(&PlayerTag(PlayerType::You)));
         for (pos, body) in query.iter(&mut self.world) {
-            self.player_metadata.player_pos = *pos;
-            self.player_metadata.player_body_length = body.length();
+            self.cache.player_pos = *pos;
+            self.cache.player_body_length = body.length();
         }
 
-        let scale = 1.0 / self.zoom.factor(self.player_metadata.player_body_length);
+        let scale = 1.0 / self.zoom.factor(self.cache.player_body_length);
         let viewport = graphics::Rect {
-            x: self.player_metadata.player_pos.x - (scale * WINDOW_WIDTH / 2.0),
-            y: self.player_metadata.player_pos.y - (scale * WINDOW_HEIGHT / 2.0),
+            x: self.cache.player_pos.x - (scale * WINDOW_WIDTH / 2.0),
+            y: self.cache.player_pos.y - (scale * WINDOW_HEIGHT / 2.0),
             w: scale * WINDOW_WIDTH,
             h: scale * WINDOW_HEIGHT,
         };

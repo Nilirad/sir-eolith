@@ -3,6 +3,7 @@ use crate::connection::{ClientMsg, ServerMsg, Op, ConnectionState};
 use crate::types::*;
 use crate::nalgebra_prelude::*;
 use legion::prelude::*;
+use ggez::graphics::{Text, TextFragment, Scale};
 
 impl<'connection> State<'connection> {
     pub fn handle_login_info(&mut self, message: ServerMsg) {
@@ -148,18 +149,11 @@ impl<'connection> State<'connection> {
                 let fullness = message.read_fullness();
                 message.go_to(18);
                 let pos = message.read_pos_6_bytes();
-                
-                /* let nickname_length = message.read_u8();
-                let _nickname = if nickname_length > 0 {
-                    let nick = "TODO".to_owned();
-                    message.skip(nickname_length as usize);
-                    nick
-                } else {
-                    "".to_owned()
-                }; */
+
                 let nickname = message.read_string();
-                println!("{}: {}", id, nickname);
-                
+                let text_fragment = TextFragment::new(nickname).scale(Scale::uniform(50.0));
+                let nickname_text = Text::new(text_fragment);
+                self.cache.nicknames.insert(id, nickname_text);
 
                 let skin_data_length = message.read_u8();
                 let _skin_data = if skin_data_length > 0 {
@@ -174,10 +168,10 @@ impl<'connection> State<'connection> {
 
                 let movement = Movement::new(speed, angle, target_angle, Direction::None);
 
-                let tag = if self.player_metadata.player_set {
+                let tag = if self.cache.player_set {
                     PlayerTag(PlayerType::Other)
                 } else {
-                    self.player_metadata.player_set = true; // TODO: This side effect is not the best thing...
+                    self.cache.player_set = true; // TODO: This side effect is not the best thing...
                     PlayerTag(PlayerType::You)
                 };
 
@@ -186,7 +180,6 @@ impl<'connection> State<'connection> {
                     vec![(
                         (
                             id,
-                            nickname,
                             pos,
                             body,
                             movement,
