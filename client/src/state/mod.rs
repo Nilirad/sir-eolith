@@ -10,6 +10,7 @@ use std::time::Instant;
 use legion::prelude::*;
 use legion::borrow::RefMut;
 use bit_vec::BitVec;
+use hashbrown::hash_map::HashMap;
 
 struct Ping {
     waiting_response: bool,
@@ -91,18 +92,20 @@ impl Default for Params {
     }
 }
 
-struct PlayerMetadata {
-    set: bool,
-    pos: Pos,
-    body_length: f32,
+struct Cache {
+    player_set: bool,
+    player_pos: Pos,
+    player_body_length: f32,
+    nicknames: HashMap<Id, Text>,
 }
 
-impl Default for PlayerMetadata {
+impl Default for Cache {
     fn default() -> Self {
         Self {
-            set: false,
-            pos: Pos::new(0.0, 0.0),
-            body_length: 2.0,
+            player_set: false,
+            player_pos: Pos::new(0.0, 0.0),
+            player_body_length: 2.0,
+            nicknames: HashMap::new(),
         }
     }
 }
@@ -161,7 +164,7 @@ pub struct State<'connection> {
     controller: SnakeController,
     ping_status: Ping,
     last_update: Instant,
-    player_metadata: PlayerMetadata,
+    player_metadata: Cache,
     zoom: Zoom,
     params: Params,
     stats: Stats,
@@ -175,7 +178,7 @@ impl<'connection> State<'connection> {
             controller: SnakeController::new(),
             ping_status: Ping::new(false),
             last_update: Instant::now(),
-            player_metadata: PlayerMetadata::default(),
+            player_metadata: Cache::default(),
             zoom: Zoom::new(),
             params: Params::default(),
             stats: Stats::default(),
