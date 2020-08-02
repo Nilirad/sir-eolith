@@ -22,6 +22,7 @@ impl<'connection> State<'connection> {
         self.draw_leaderboard(ctx);
         self.draw_score(ctx);
         self.draw_rank(ctx);
+        self.draw_debug_info(ctx);
         graphics::draw_queued_text(
             ctx,
             graphics::DrawParam::default(),
@@ -225,6 +226,34 @@ impl<'connection> State<'connection> {
         );
     }
 
+    fn draw_debug_info(&mut self, ctx: &mut Context) {
+        const TEXT_X: f32 = WINDOW_WIDTH as f32 - MINIMAP_SIDE as f32 - 20.0 - 50.0;
+        const TEXT_Y: f32 = WINDOW_HEIGHT as f32 - MINIMAP_SIDE as f32 - 100.0;
+        
+        self.debug_info.fps(ggez::timer::fps(ctx));
+        
+        graphics::queue_text(
+            ctx,
+            &self.debug_info.x,
+            na::Point2::new(TEXT_X, TEXT_Y),
+            None,
+        );
+
+        graphics::queue_text(
+            ctx,
+            &self.debug_info.y,
+            na::Point2::new(TEXT_X + 60.0, TEXT_Y),
+            None,
+        );
+
+        graphics::queue_text(
+            ctx,
+            &self.debug_info.fps,
+            na::Point2::new(TEXT_X, TEXT_Y + 20.0),
+            None,
+        );
+    }
+
     fn draw_minimap(&mut self, ctx: &mut Context) -> GameResult {
         let mut minimap_mesh_builder = MeshBuilder::new();
 
@@ -304,6 +333,7 @@ impl<'connection> State<'connection> {
         for (pos, body) in query.iter(&mut self.world) {
             self.cache.player_pos = *pos;
             self.cache.player_body_length = body.length();
+            self.debug_info.pos(*pos);
         }
 
         let scale = 1.0 / self.zoom.factor(self.cache.player_body_length);
