@@ -231,6 +231,7 @@ impl<'connection> State<'connection> {
         const TEXT_Y: f32 = WINDOW_HEIGHT as f32 - MINIMAP_SIDE as f32 - 100.0;
         
         self.debug_info.fps(ggez::timer::fps(ctx));
+        self.debug_info.ping(self.ping_status.last_ping);
         
         graphics::queue_text(
             ctx,
@@ -250,6 +251,13 @@ impl<'connection> State<'connection> {
             ctx,
             &self.debug_info.fps,
             na::Point2::new(TEXT_X, TEXT_Y + 20.0),
+            None,
+        );
+
+        graphics::queue_text(
+            ctx,
+            &self.debug_info.ping,
+            na::Point2::new(TEXT_X, TEXT_Y + 40.0),
             None,
         );
     }
