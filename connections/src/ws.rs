@@ -17,6 +17,8 @@ pub struct WebSocket {
     channel: Receiver<ServerMsg>,
     /// Connection state.
     pub state: ConnectionState,
+    /// Server url.
+    url: String
 }
 
 impl WebSocket {
@@ -66,6 +68,7 @@ impl WebSocket {
                 sender,
                 channel: rx,
                 state: ConnectionState::LoggingIn,
+                url,
             },
             thread_handle,
         )
@@ -105,5 +108,9 @@ impl Connection for WebSocket {
 
     fn set_state(&mut self, state: ConnectionState) {
         self.state = state;
+    }
+
+    fn url(&self) -> String {
+        self.url.clone()
     }
 }

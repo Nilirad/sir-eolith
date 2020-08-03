@@ -295,6 +295,7 @@ pub trait Connection {
     fn close(&mut self) {}
     fn state(&self) -> ConnectionState;
     fn set_state(&mut self, _state: ConnectionState) {}
+    fn url(&self) -> String { "".to_owned() }
 }
 
 #[cfg(test)]
