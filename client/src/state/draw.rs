@@ -15,7 +15,7 @@ impl<'connection> State<'connection> {
         self.draw_snakes(&mut mesh_builder, ctx)?;
         let mesh = mesh_builder.build(ctx)?;
         graphics::draw(ctx, &mesh, (na::Point2::new(0.0, 0.0),))?;
-        self.draw_nicknames(ctx)?;
+        if self.cache.nametags_shown { self.draw_nicknames(ctx)?; }
         
         self.screen_coords(ctx)?;
         self.draw_minimap(ctx)?;
@@ -76,13 +76,15 @@ impl<'connection> State<'connection> {
                 Color::new(0.0, 0.5, 0.0, 1.0),
             );
 
-            if let Some(nickname) = self.cache.nicknames.get(&id) {
-                graphics::queue_text(
-                    ctx,
-                    nickname,
-                    na::Point::from(*pos),
-                    Some(graphics::BLACK),
-                );
+            if self.cache.nametags_shown {
+                if let Some(nickname) = self.cache.nicknames.get(&id) {
+                    graphics::queue_text(
+                        ctx,
+                        nickname,
+                        na::Point::from(*pos),
+                        Some(graphics::BLACK),
+                    );
+                }
             }
 
             /* let ang_line = vec![

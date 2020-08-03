@@ -107,6 +107,7 @@ struct Cache {
     player_pos: Pos,
     player_body_length: f32,
     nicknames: HashMap<Id, Text>,
+    nametags_shown: bool,
 }
 
 impl Default for Cache {
@@ -116,6 +117,7 @@ impl Default for Cache {
             player_pos: Pos::new(0.0, 0.0),
             player_body_length: 2.0,
             nicknames: HashMap::new(),
+            nametags_shown: true,
         }
     }
 }
@@ -470,6 +472,7 @@ impl<'connection> EventHandler for State<'connection> {
         match keycode {
             KeyCode::Z => self.zoom.0 = None,
             KeyCode::A => println!("fps: {}", ggez::timer::fps(_ctx)),
+            KeyCode::Q => self.cache.nametags_shown = !self.cache.nametags_shown,
             _ => (),
         }
     }
