@@ -22,7 +22,7 @@ impl<'connection> State<'connection> {
         self.draw_leaderboard(ctx);
         self.draw_score(ctx);
         self.draw_rank(ctx);
-        self.draw_debug_info(ctx);
+        if self.debug_info.shown { self.draw_debug_info(ctx); }
         graphics::draw_queued_text(
             ctx,
             graphics::DrawParam::default(),
@@ -232,6 +232,7 @@ impl<'connection> State<'connection> {
         const TEXT_X: f32 = WINDOW_WIDTH as f32 - MINIMAP_SIDE as f32 - 20.0 - 50.0;
         const TEXT_Y: f32 = WINDOW_HEIGHT as f32 - MINIMAP_SIDE as f32 - 100.0;
         
+        self.debug_info.pos(self.cache.player_pos);
         self.debug_info.fps(ggez::timer::fps(ctx));
         self.debug_info.ping(self.ping_status.last_ping);
         
@@ -343,7 +344,6 @@ impl<'connection> State<'connection> {
         for (pos, body) in query.iter(&mut self.world) {
             self.cache.player_pos = *pos;
             self.cache.player_body_length = body.length();
-            self.debug_info.pos(*pos);
         }
 
         let scale = 1.0 / self.zoom.factor(self.cache.player_body_length);

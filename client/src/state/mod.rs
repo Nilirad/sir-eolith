@@ -33,7 +33,7 @@ impl Ping {
 
     fn switch(&mut self) {
         let now = Instant::now();
-        self.waiting_response = !self.waiting_response;
+        self.waiting_response ^= true;
 
         if !self.waiting_response {
             self.last_ping = (now - self.ping_request_time).as_millis();
@@ -171,6 +171,7 @@ impl Stats {
 }
 
 struct DebugInfo {
+    shown: bool,
     x: Text,
     y: Text,
     server_ip: Text,
@@ -230,6 +231,7 @@ impl Default for DebugInfo {
 
 
         Self {
+            shown: false,
             x,
             y,
             server_ip,
@@ -471,8 +473,8 @@ impl<'connection> EventHandler for State<'connection> {
         ) {
         match keycode {
             KeyCode::Z => self.zoom.0 = None,
-            KeyCode::A => println!("fps: {}", ggez::timer::fps(_ctx)),
-            KeyCode::Q => self.cache.nametags_shown = !self.cache.nametags_shown,
+            KeyCode::A => self.debug_info.shown ^= true,
+            KeyCode::Q => self.cache.nametags_shown ^= true,
             _ => (),
         }
     }
