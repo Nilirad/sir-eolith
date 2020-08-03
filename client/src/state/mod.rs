@@ -174,7 +174,7 @@ struct DebugInfo {
     shown: bool,
     x: Text,
     y: Text,
-    server_ip: Text,
+    server_url: Text,
     ping: Text,
     fps: Text,
 }
@@ -185,8 +185,8 @@ impl DebugInfo {
         self.y.fragments_mut()[1].text = format!("{:.2}", pos.y);
     }
 
-    pub fn server_ip(&mut self, server_ip: String) {
-        self.server_ip.fragments_mut()[1].text = server_ip;
+    pub fn server_url(&mut self, server_ip: String) {
+        self.server_url.fragments_mut()[1].text = server_ip;
     }
 
     pub fn ping(&mut self, ping: u128) {
@@ -234,7 +234,7 @@ impl Default for DebugInfo {
             shown: false,
             x,
             y,
-            server_ip,
+            server_url: server_ip,
             ping,
             fps,
         }
@@ -256,6 +256,9 @@ pub struct State<'connection> {
 
 impl<'connection> State<'connection> {
     pub fn new(connection: &'connection mut dyn Connection) -> Self {
+        let mut debug_info = DebugInfo::default();
+        debug_info.server_url(connection.url());
+        
         Self {
             connection,
             world: World::new(),
@@ -266,7 +269,7 @@ impl<'connection> State<'connection> {
             zoom: Zoom::new(),
             params: Params::default(),
             stats: Stats::default(),
-            debug_info: DebugInfo::default(),
+            debug_info,
         }
     }
 

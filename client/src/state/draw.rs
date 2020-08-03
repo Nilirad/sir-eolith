@@ -229,7 +229,7 @@ impl<'connection> State<'connection> {
     }
 
     fn draw_debug_info(&mut self, ctx: &mut Context) {
-        const TEXT_X: f32 = WINDOW_WIDTH as f32 - MINIMAP_SIDE as f32 - 20.0 - 50.0;
+        const TEXT_X: f32 = WINDOW_WIDTH as f32 - MINIMAP_SIDE as f32 - 20.0 - 100.0;
         const TEXT_Y: f32 = WINDOW_HEIGHT as f32 - MINIMAP_SIDE as f32 - 100.0;
         
         self.debug_info.pos(self.cache.player_pos);
@@ -261,6 +261,13 @@ impl<'connection> State<'connection> {
             ctx,
             &self.debug_info.ping,
             na::Point2::new(TEXT_X, TEXT_Y + 40.0),
+            None,
+        );
+
+        graphics::queue_text(
+            ctx,
+            &self.debug_info.server_url,
+            na::Point2::new(TEXT_X, TEXT_Y + 60.0),
             None,
         );
     }
