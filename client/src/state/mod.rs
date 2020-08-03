@@ -16,20 +16,30 @@ struct Ping {
     waiting_response: bool,
     since: Instant,
     lag_multiplier: f32,
+    ping_request_time: Instant,
+    last_ping: u128,
 }
 
 impl Ping {
-    fn new(waiting_response: bool) -> Self {
+    fn new() -> Self {
         Self {
-            waiting_response,
+            waiting_response: false,
             since: Instant::now(),
             lag_multiplier: 1.0,
+            ping_request_time: Instant::now(),
+            last_ping: 0,
         }
     }
 
     fn switch(&mut self) {
+        let now = Instant::now();
         self.waiting_response = !self.waiting_response;
-        self.since = Instant::now();
+
+        if !self.waiting_response {
+            self.last_ping = (now - self.ping_request_time).as_millis();
+        }
+
+        self.since = now;
     }
 
     fn lagging(&self) -> bool {
@@ -176,7 +186,7 @@ impl DebugInfo {
         self.server_ip.fragments_mut()[1].text = server_ip;
     }
 
-    pub fn ping(&mut self, ping: f32) {
+    pub fn ping(&mut self, ping: u128) {
         self.ping.fragments_mut()[1].text = ping.to_string();
     }
 
@@ -195,7 +205,7 @@ impl Default for DebugInfo {
         x.add("");
         y.add("");
         server_ip.add("");
-        ping.add("");
+        ping.add("").add(" ms");
         fps.add("");
 
         let scale = Scale::uniform(10.0);
@@ -246,7 +256,7 @@ impl<'connection> State<'connection> {
             connection,
             world: World::new(),
             controller: SnakeController::new(),
-            ping_status: Ping::new(false),
+            ping_status: Ping::new(),
             last_update: Instant::now(),
             cache: Cache::default(),
             zoom: Zoom::new(),
@@ -287,6 +297,7 @@ impl<'connection> State<'connection> {
 
         if self.ping_status.can_send_ping() {
             self.connection.send(PING_MESSAGE.to_vec());
+            self.ping_status.ping_request_time = Instant::now();
             self.ping_status.switch();
         }
     }
